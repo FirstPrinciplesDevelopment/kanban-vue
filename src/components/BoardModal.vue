@@ -1,7 +1,6 @@
 <template>
-    <button class="btn btn-primary" v-on:click="showModal = true">New Board</button>
     <!-- The Board Modal -->
-    <div id="boardModal" class="modal" v-if="showModal">
+    <div id="board-modal" class="modal">
         <!-- Modal content -->
         <div class="modal-content">
             <div class="modal-header">
@@ -17,8 +16,8 @@
             </div>
             <div class="modal-footer">
                 <h3>Modal Footer</h3>
-                <button class="btn btn-primary" v-on:click="createBoardAsync(board)">Create</button>
-                <button class="btn btn-danger" v-on:click="showModal = false">Cancel</button>
+                <button class="btn btn-primary" v-on:click="handleBoardSave">Save</button>
+                <button class="btn btn-danger" v-on:click="$emit('close')">Cancel</button>
             </div>
         </div> 
     </div>
@@ -28,32 +27,31 @@
 // import { mapActions } from 'vuex';
 
 export default {
-    name: "CreateBoard",
+    name: "BoardModal",
+    props: ['initialBoard'],
     data() {
         return {
-            board: {
-                name: '',
-                slug: '',
-                position: 0,
-                changed_by: null,
-                archived: false,
-                archived_by: null,
-                archived_time: null
-            },
-            showModal: false
+            board: this.initialBoard,
         }
     },
     methods: {
-        createBoardAsync() {
-            this.$store.dispatch('createBoardAsync', this.board);
+        handleBoardSave() {
+            if (this.board.id > 0)
+            {
+                // update board
+                this.$store.dispatch('updateBoardAsync', this.board);
+            }
+            else {
+                // TODO: move this logic elsewhere
+                this.board.archived = false;
+                // create board
+                this.$store.dispatch('createBoardAsync', this.board);
+            }
             // close modal
-            this.showModal = false;
+            this.$emit('close');
             // reset local state
-            this.board = {name: '', slug: '', position: 0, changed_by: null, archived: false, archived_by: null, archived_time: null};
+            this.board = {};
         }
-        // ...mapActions([
-        //     'createBoardAsync'
-        // ])
     }
 }
 </script>

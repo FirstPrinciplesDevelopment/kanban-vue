@@ -60,6 +60,12 @@ export default createStore({
       commit('createBoard', data);
     },
     async updateBoardAsync({ commit }, payload) {
+      // TODO: can this be handled more elegantly?
+      // remove array members that can't be handled by API
+      delete payload.containers;
+      delete payload.members;
+      delete payload.labels;
+      delete payload.attachments;
       console.log("in updateBoardAsync action");
       const { data } = await axios.put(`http://127.0.0.1:8000/boards/${payload.id}/`, payload, {
         headers: {
