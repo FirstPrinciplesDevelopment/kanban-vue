@@ -25,13 +25,14 @@
 
 <script>
 // import { mapActions } from 'vuex';
+import _ from "lodash"
 
 export default {
     name: "BoardModal",
     props: ['initialBoard'],
     data() {
         return {
-            board: this.initialBoard,
+            board: _.clone(this.initialBoard),
         }
     },
     methods: {
