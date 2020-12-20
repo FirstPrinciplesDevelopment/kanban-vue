@@ -5,6 +5,11 @@ export default createStore({
   state: {
     boards: []
   },
+  getters: {
+    getBoardById: (state) => (id) => {
+      return state.boards.find(board => board.id == id);
+    }
+  },
   mutations: {
     loadBoards(state, data) {
       console.log("loadBoards mutation");

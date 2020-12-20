@@ -9,7 +9,7 @@
             <th></th>
         </tr>
         <tr v-for="board in boards" v-bind:key="board.url">
-            <td>{{ board.name }}</td>
+            <td><router-link :to="'/board/' + board.id">{{ board.name }}</router-link></td>
             <td>{{ board.archived }}</td>
             <td>{{ board.position }}</td>
             <td><button v-on:click="handleBoardEdit(board)" class="btn btn-primary">Edit</button></td>
