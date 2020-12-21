@@ -1,6 +1,8 @@
 <template>
     <div class="card-component">
-        Card Component (not implemented) for <span>{{ id }}</span>
+        <h4>{{ card.name }}</h4>
+        <!-- <div>{{ card.id }}</div> -->
+        <div>{{ card.content }}</div>
     </div>
 </template>
 
@@ -9,7 +11,7 @@
 
 export default {
     name: "Card",
-    props: ['id'],
+    props: ['card'],
     data() {
         return {}
     },
@@ -20,5 +22,12 @@ export default {
 </script>
 
 <style scoped>
-
+    .card-component {
+        padding: 1em;
+        margin: 1em;
+        border-radius: 7px;
+        color: #c0d4ee;
+        background-color: #303366;
+        box-shadow: 5px 7px 5px #000;
+    }
 </style>

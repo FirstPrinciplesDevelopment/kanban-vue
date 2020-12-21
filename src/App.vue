@@ -20,7 +20,7 @@
 
 body {
   color: #10cc39;
-  background-color: #33333f;
+  background-color: #0d1117;
 }
 
 #nav {
