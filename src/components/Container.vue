@@ -1,21 +1,23 @@
 <template>
     <div class="container-component">
-        Container Component (not implemented) for <span>{{ id }}</span>
+        <h2>{{ container.name }}</h2>
+        <span>{{ container.url }}</span>
+        <span>{{ container.position }}</span>
     </div>
 </template>
 
 <script>
-// import { mapActions } from 'vuex';
+// import { mapGetters } from 'vuex';
+// import store from 'vuex';
 
 export default {
     name: "Container",
-    props: ['id'],
+    props: ['container'],
     data() {
         return {}
     },
     methods: {
-
-    }
+    },
 }
 </script>
 

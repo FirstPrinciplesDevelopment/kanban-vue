@@ -1,8 +1,8 @@
 <template>
   <div class="board">
-    <h2>{{ board.name }}</h2>
+    <h1>{{ board.name }}</h1>
     <div v-for="container in board.containers" v-bind:key="container.url">
-      <Container :id="container.url"/>
+      <Container :container="container"/>
     </div>
   </div>
 </template>
