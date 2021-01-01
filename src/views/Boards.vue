@@ -8,7 +8,7 @@
             <th></th>
             <th></th>
         </tr>
-        <tr v-for="board in boards" v-bind:key="board.url">
+        <tr v-for="board in boards" v-bind:key="board.id">
             <td><router-link :to="'/board/' + board.id">{{ board.name }}</router-link></td>
             <td>{{ board.archived }}</td>
             <td>{{ board.position }}</td>
@@ -61,11 +61,6 @@ export default {
     ...mapActions([
       'deleteBoardAsync'
     ])
-  },
-  created: function () {
-      console.log("Loading Boards...");
-      store.dispatch('loadBoardsAsync');
-      console.log("Done loading Boards");
   }
 }
 </script>

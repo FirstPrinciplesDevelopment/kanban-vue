@@ -2,10 +2,6 @@
     <div v-if="container">
         <div class="container-component">
             <h2>{{ container.name }}</h2>
-            <!-- <div>{{ container.position }}</div> -->
-            <div v-for="card in container.cards" v-bind:key="card.id">
-                <Card :cardProp="card"/>
-            </div>
         </div>
     </div>
     <div v-else>
