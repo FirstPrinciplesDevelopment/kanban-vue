@@ -1,64 +1,65 @@
 <template>
-    <!-- The Board Modal -->
-    <div id="board-modal" class="modal">
-        <!-- Modal content -->
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="close">&times;</span>
-                <h2>Modal Header</h2>
-            </div>
-            <div class="modal-body">
-                <div class="create-board">
-                    <input type="text" v-model="board.name" placeholder="name" />
-                    <input type="text" v-model="board.slug" placeholder="slug" />
-                    <input type="number" step="1" v-model="board.position" />
-                </div>
-            </div>
-            <div class="modal-footer">
-                <h3>Modal Footer</h3>
-                <button class="btn btn-primary" v-on:click="handleBoardSave">Save</button>
-                <button class="btn btn-danger" v-on:click="$emit('close')">Cancel</button>
-            </div>
-        </div> 
+  <!-- The Board Modal -->
+  <div id="board-modal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="close">&times;</span>
+        <h2>Modal Header</h2>
+      </div>
+      <div class="modal-body">
+        <div class="create-board">
+          <input type="text" v-model="board.name" placeholder="name" />
+          <input type="text" v-model="board.slug" placeholder="slug" />
+          <input type="number" step="1" v-model="board.position" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <h3>Modal Footer</h3>
+        <button class="btn btn-primary" v-on:click="handleBoardSave">
+          Save
+        </button>
+        <button class="btn btn-danger" v-on:click="$emit('close')">
+          Cancel
+        </button>
+      </div>
     </div>
+  </div>
 </template>
 
 <script>
-// import { mapActions } from 'vuex';
-import _ from "lodash"
+import _ from 'lodash';
 
 export default {
-    name: "BoardModal",
-    props: ['initialBoard'],
-    data() {
-        return {
-            board: _.clone(this.initialBoard),
-        }
+  name: 'BoardModal',
+  props: ['initialBoard'],
+  data() {
+    return {
+      board: _.clone(this.initialBoard),
+    };
+  },
+  methods: {
+    handleBoardSave() {
+      if (this.board.id > 0) {
+        // update board
+        this.$store.dispatch('updateBoardAsync', this.board);
+      } else {
+        // TODO: move this logic elsewhere
+        this.board.archived = false;
+        // create board
+        this.$store.dispatch('createBoardAsync', this.board);
+      }
+      // close modal
+      this.$emit('close');
+      // reset local state
+      this.board = {};
     },
-    methods: {
-        handleBoardSave() {
-            if (this.board.id > 0)
-            {
-                // update board
-                this.$store.dispatch('updateBoardAsync', this.board);
-            }
-            else {
-                // TODO: move this logic elsewhere
-                this.board.archived = false;
-                // create board
-                this.$store.dispatch('createBoardAsync', this.board);
-            }
-            // close modal
-            this.$emit('close');
-            // reset local state
-            this.board = {};
-        }
-    }
-}
+  },
+};
 </script>
 
 <style scoped>
- /* The Modal (background) */
+/* The Modal (background) */
 .modal {
   /* display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
@@ -68,8 +69,8 @@ export default {
   width: 100%; /* Full width */
   height: 100%; /* Full height */
   overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
 }
 
 /* Modal Content/Box */
@@ -96,7 +97,7 @@ export default {
   cursor: pointer;
 }
 
- /* Modal Header */
+/* Modal Header */
 .modal-header {
   padding: 2px 16px;
   background-color: #5cb85c;
@@ -104,7 +105,9 @@ export default {
 }
 
 /* Modal Body */
-.modal-body {padding: 2px 16px;}
+.modal-body {
+  padding: 2px 16px;
+}
 
 /* Modal Footer */
 .modal-footer {
@@ -121,14 +124,20 @@ export default {
   padding: 0;
   border: 1px solid #888;
   width: 80%;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   animation-name: animatetop;
-  animation-duration: 0.4s
+  animation-duration: 0.4s;
 }
 
 /* Add Animation */
 @keyframes animatetop {
-  from {top: -300px; opacity: 0}
-  to {top: 0; opacity: 1}
-} 
+  from {
+    top: -300px;
+    opacity: 0;
+  }
+  to {
+    top: 0;
+    opacity: 1;
+  }
+}
 </style>

@@ -1,11 +1,11 @@
 import { createStore } from 'vuex';
-import axios from "axios";
+import axios from 'axios';
 
 export default createStore({
   // enable strict mode for development only (impacts performance)
   strict: true,
   state: {
-    authToken: "",
+    authToken: '',
     isAuthenticated: false,
     boards: {
       /*
@@ -88,7 +88,7 @@ export default createStore({
     },
     cardList: [
       // ...ids
-    ]
+    ],
   },
   getters: {
     getBoardById: (state) => (id) => {
@@ -97,8 +97,7 @@ export default createStore({
     getContainersByBoardId: (state) => (board_id) => {
       var result = [];
       for (const id of state.containerList) {
-        if (state.containers[id].board.id == board_id)
-        {
+        if (state.containers[id].board.id == board_id) {
           result.push(state.containers[id]);
         }
       }
@@ -108,42 +107,41 @@ export default createStore({
       return state.containers[id];
     },
     getCardsByContainerId: (state) => (container_id) => {
-      return state.cards.filter((x) => x.container.id = container_id);
+      return state.cards.filter((x) => (x.container.id = container_id));
     },
     getCardById: (state) => (id) => {
       return state.cards[id];
-    }
+    },
   },
   mutations: {
     // mutations change vuex state, they DO NOT call APIs
     authenticate(state, data) {
-      console.log("authenticate mutation");
+      console.log('authenticate mutation');
       console.log(data);
-      if (data["token"]) {
-        state.authToken = data["token"];
+      if (data['token']) {
+        state.authToken = data['token'];
         state.isAuthenticated = true;
-        console.log("auth succeeded");
-      }
-      else {
-        console.log("auth failed");
+        console.log('auth succeeded');
+      } else {
+        console.log('auth failed');
       }
     },
     loadData(state, data) {
-      console.log("loadData mutation");
-      console.log("data from API:");
+      console.log('loadData mutation');
+      console.log('data from API:');
       console.log(data);
       // set boards
-      for (const board of data["boards"]) {
+      for (const board of data['boards']) {
         state.boards[board.id] = board;
         state.boardList.push(board.id);
       }
       // set containers
-      for (const container of data["containers"]) {
+      for (const container of data['containers']) {
         state.containers[container.id] = container;
         state.containerList.push(container.id);
       }
       // set cards
-      for (const card of data["cards"]) {
+      for (const card of data['cards']) {
         state.cards[card.id] = card;
         state.cardList.push(card.id);
       }
@@ -162,11 +160,11 @@ export default createStore({
       //   state.members[member.id] = member;
       //   state.memberList.push(member.id);
       // }
-      console.log("Data in state:");
+      console.log('Data in state:');
       console.log(state);
     },
     loadBoards(state, data) {
-      console.log("loadBoards mutation");
+      console.log('loadBoards mutation');
       console.log(data);
       // maintain boards in state like Array [ board_id : {board_object}, ...]
       for (const board of data) {
@@ -175,14 +173,14 @@ export default createStore({
       }
     },
     createBoard(state, data) {
-      console.log("createBoard mutation");
+      console.log('createBoard mutation');
       console.log(data);
       // add a board to state like boards[board_id] : {board_object}
       state.boards[data.id] = data;
       state.boardList.push(data.id);
     },
     deleteBoard(state, id) {
-      console.log("deleteBoard mutation");
+      console.log('deleteBoard mutation');
       console.log(id);
       // delete a board, which is a key: {value} on the boards object
       delete state.boards[id];
@@ -191,14 +189,14 @@ export default createStore({
     },
     updateBoard(state, data) {
       // identical to createBoard, but may be extended in the future
-      console.log("updateBoard mutation");
+      console.log('updateBoard mutation');
       console.log(data);
       // update a board in state like boards[board_id] : {board_object}
       state.boards[data.id] = data;
       // no need to update state.boardList - the id cannot change
-    }, 
+    },
     loadContainers(state, data) {
-      console.log("loadContainers mutation");
+      console.log('loadContainers mutation');
       console.log(data);
       // maintain containers in state like Array [ container_id : {container_object}, ...]
       for (const container of data) {
@@ -207,14 +205,14 @@ export default createStore({
       }
     },
     createContainer(state, data) {
-      console.log("createContainer mutation");
+      console.log('createContainer mutation');
       console.log(data);
       // add a container to state like containers[container_id] : {container_object}
       state.containers[data.id] = data;
       state.containerList.push(data.id);
     },
     deleteContainer(state, id) {
-      console.log("deleteContainer mutation");
+      console.log('deleteContainer mutation');
       console.log(id);
       // delete a container, which is a key: {value} on the containers object
       delete state.containers[id];
@@ -223,14 +221,14 @@ export default createStore({
     },
     updateContainer(state, data) {
       // identical to createContainer, but may be extended in the future
-      console.log("updateContainer mutation");
+      console.log('updateContainer mutation');
       console.log(data);
       // update a container in state like containers[container_id] : {container_object}
       state.containers[data.id] = data;
       // no need to update state.containerList - the id cannot change
     },
     loadCards(state, data) {
-      console.log("loadCards mutation");
+      console.log('loadCards mutation');
       console.log(data);
       // maintain cards in state like Array [ card_id : {card_object}, ...]
       for (const card of data) {
@@ -239,14 +237,14 @@ export default createStore({
       }
     },
     createCard(state, data) {
-      console.log("createCard mutation");
+      console.log('createCard mutation');
       console.log(data);
       // add a card to state like cards[card_id] : {card_object}
       state.cards[data.id] = data;
       state.cardList.push(data.id);
     },
     deleteCard(state, id) {
-      console.log("deleteCard mutation");
+      console.log('deleteCard mutation');
       console.log(id);
       // delete a card, which is a key: {value} on the cards object
       delete state.cards[id];
@@ -255,53 +253,57 @@ export default createStore({
     },
     updateCard(state, data) {
       // identical to createCard, but may be extended in the future
-      console.log("updateCard mutation");
+      console.log('updateCard mutation');
       console.log(data);
       // update a card in state like cards[card_id] : {card_object}
       state.cards[data.id] = data;
       // no need to update state.cardList - the id cannot change
-    }, 
+    },
   },
   actions: {
     async authenticateAsync({ commit }, payload) {
-      console.log("in authenticateAsync action");
+      console.log('in authenticateAsync action');
       const { data } = await axios.post('http://127.0.0.1:8000/auth/', payload);
-      commit("authenticate", data);
+      commit('authenticate', data);
     },
     async loadDataAsync({ commit }) {
-      console.log("in loadDataAsync action");
+      console.log('in loadDataAsync action');
       const { data } = await axios.get('http://127.0.0.1:8000/normalized/', {
         headers: {
-          Authorization: `Token ${this.state.authToken}`
-        }
+          Authorization: `Token ${this.state.authToken}`,
+        },
       });
-      commit("loadData", data);
+      commit('loadData', data);
     },
     async loadBoardsAsync({ commit }) {
-      console.log("in loadBoardsAsync action");
+      console.log('in loadBoardsAsync action');
       const { data } = await axios.get('http://127.0.0.1:8000/boards/', {
         headers: {
-          Authorization: `Token ${this.state.authToken}`
-        }
+          Authorization: `Token ${this.state.authToken}`,
+        },
       });
-      commit("loadBoards", data);
+      commit('loadBoards', data);
     },
     async deleteBoardAsync({ commit }, id) {
-      console.log("in deleteBoardAsync action");
+      console.log('in deleteBoardAsync action');
       await axios.delete(`http://127.0.0.1:8000/boards/${id}/`, {
         headers: {
-          Authorization: `Token ${this.state.authToken}`
-        }
+          Authorization: `Token ${this.state.authToken}`,
+        },
       });
       commit('deleteBoard', id);
     },
     async createBoardAsync({ commit }, payload) {
-      console.log("in createBoardAsync action");
-      const { data } = await axios.post(`http://127.0.0.1:8000/boards/`, payload, {
+      console.log('in createBoardAsync action');
+      const { data } = await axios.post(
+        `http://127.0.0.1:8000/boards/`,
+        payload,
+        {
           headers: {
-            Authorization: `Token ${this.state.authToken}`
-          }
-      });
+            Authorization: `Token ${this.state.authToken}`,
+          },
+        }
+      );
       commit('createBoard', data);
     },
     async updateBoardAsync({ commit }, payload) {
@@ -311,44 +313,56 @@ export default createStore({
       delete payload.members;
       delete payload.labels;
       delete payload.attachments;
-      console.log("in updateBoardAsync action");
-      const { data } = await axios.put(`http://127.0.0.1:8000/boards/${payload.id}/`, payload, {
-        headers: {
-          Authorization: `Token ${this.state.authToken}`
-        },
-      });
+      console.log('in updateBoardAsync action');
+      const { data } = await axios.put(
+        `http://127.0.0.1:8000/boards/${payload.id}/`,
+        payload,
+        {
+          headers: {
+            Authorization: `Token ${this.state.authToken}`,
+          },
+        }
+      );
       commit('updateBoard', data);
     },
     async loadContainersAsync({ commit }, payload) {
-      console.log("in loadContainersAsync action");
-      const { data } = await axios.get(`http://127.0.0.1:8000/boards/${payload.board_id}/containers/`, {
-        headers: {
-          Authorization: `Token ${this.state.authToken}`
+      console.log('in loadContainersAsync action');
+      const { data } = await axios.get(
+        `http://127.0.0.1:8000/boards/${payload.board_id}/containers/`,
+        {
+          headers: {
+            Authorization: `Token ${this.state.authToken}`,
+          },
         }
-      });
-      commit("loadContainers", data);
+      );
+      commit('loadContainers', data);
     },
     async createContainerAsync({ commit }, payload) {
-      console.log("in createContainerAsync action");
-      // const { data } = await axios.post(`http://127.0.0.1:8000/boards/${payload.board}/containers/`, payload, {
-      const { data } = await axios.post(`http://127.0.0.1:8000/boards/${payload.board.id}/containers/`, payload, {
+      console.log('in createContainerAsync action');
+      const { data } = await axios.post(
+        `http://127.0.0.1:8000/boards/${payload.board.id}/containers/`,
+        payload,
+        {
           headers: {
-            Authorization: `Token ${this.state.authToken}`
-          }
-      });
+            Authorization: `Token ${this.state.authToken}`,
+          },
+        }
+      );
       commit('createContainer', data);
     },
     async loadCardsAsync({ commit }, payload) {
-      console.log("in loadCardsAsync action");
+      console.log('in loadCardsAsync action');
       // TODO: change to payload.board.id, or payload.board ?
-      const { data } = await axios.get(`http://127.0.0.1:8000/boards/${payload.board_id}/containers/${payload.container_id}/cards/`, {
-        headers: {
-          Authorization: `Token ${this.state.authToken}`
+      const { data } = await axios.get(
+        `http://127.0.0.1:8000/boards/${payload.board_id}/containers/${payload.container_id}/cards/`,
+        {
+          headers: {
+            Authorization: `Token ${this.state.authToken}`,
+          },
         }
-      });
-      commit("loadCards", data);
+      );
+      commit('loadCards', data);
     },
   },
-  modules: {
-  }
+  modules: {},
 });

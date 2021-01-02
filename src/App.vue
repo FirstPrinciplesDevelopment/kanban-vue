@@ -8,17 +8,14 @@
 </template>
 
 <script>
-// @ is an alias to /src
-// import store from 'vuex'
-
 export default {
   name: 'App',
   created() {
-      console.log("Loading Data...");
-      this.$store.dispatch('loadDataAsync');
-      console.log("Done loading data");
+    console.log('Loading Data...');
+    this.$store.dispatch('loadDataAsync');
+    console.log('Done loading data');
   }
-}
+};
 </script>
 
 <style>

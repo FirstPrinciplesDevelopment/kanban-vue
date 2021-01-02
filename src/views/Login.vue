@@ -17,17 +17,17 @@
 export default {
   name: 'Login',
   data() {
-    return { userName: "", password: "" };
+    return { userName: '', password: '' };
   },
   methods: {
     async authenticate() {
-      console.log("Authenticating async (awaiting)...");
+      console.log('Authenticating async (awaiting)...');
       await this.$store.dispatch('authenticateAsync', { username: this.userName, password: this.password });
-      console.log("Done Authenticating");
+      console.log('Done Authenticating');
       this.$router.push({ name: 'Home' });
     }
   },
-}
+};
 </script>
 
 <style scoped>
