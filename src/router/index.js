@@ -1,7 +1,9 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/Home.vue'
-import Boards from '../views/Boards.vue'
-import Board from '../views/Board.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import Home from '../views/Home.vue';
+import Boards from '../views/Boards.vue';
+import Board from '../views/Board.vue';
+import Login from '../views/Login.vue';
+import store from '../store/index.js';
 
 const routes = [
   {
@@ -29,11 +31,25 @@ const routes = [
     component: Board,
     props: true
   },
-]
+  {
+    path: '/login/',
+    name: 'Login',
+    component: Login
+  }
+];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
-})
+});
 
-export default router
+router.beforeEach((to, from, next) => {
+  if (to.name !== 'Login' && !store.state.isAuthenticated) {
+    next({ name: 'Login' });
+  }
+  else {
+    next();
+  }
+});
+
+export default router;

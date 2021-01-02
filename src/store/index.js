@@ -1,4 +1,4 @@
-import { createStore } from 'vuex'
+import { createStore } from 'vuex';
 import axios from "axios";
 
 export default createStore({
@@ -6,6 +6,7 @@ export default createStore({
   strict: true,
   state: {
     authToken: "",
+    isAuthenticated: false,
     boards: {
       /*
       id: {
@@ -118,7 +119,14 @@ export default createStore({
     authenticate(state, data) {
       console.log("authenticate mutation");
       console.log(data);
-      state.authToken = data["token"];
+      if (data["token"]) {
+        state.authToken = data["token"];
+        state.isAuthenticated = true;
+        console.log("auth succeeded");
+      }
+      else {
+        console.log("auth failed");
+      }
     },
     loadData(state, data) {
       console.log("loadData mutation");
@@ -255,19 +263,16 @@ export default createStore({
     }, 
   },
   actions: {
-    async authenticateAsync({ commit }) {
+    async authenticateAsync({ commit }, payload) {
       console.log("in authenticateAsync action");
-      const { data } = await axios.post('http://127.0.0.1:8000/auth/', {
-        "username": "admin",
-        "password": "Pwd1234."
-      });
+      const { data } = await axios.post('http://127.0.0.1:8000/auth/', payload);
       commit("authenticate", data);
     },
     async loadDataAsync({ commit }) {
       console.log("in loadDataAsync action");
       const { data } = await axios.get('http://127.0.0.1:8000/normalized/', {
         headers: {
-          Authorization: 'Token 4e4898303f4ead5cb3d400d66630cfb747457938'
+          Authorization: `Token ${this.state.authToken}`
         }
       });
       commit("loadData", data);
@@ -276,7 +281,7 @@ export default createStore({
       console.log("in loadBoardsAsync action");
       const { data } = await axios.get('http://127.0.0.1:8000/boards/', {
         headers: {
-          Authorization: 'Token 4e4898303f4ead5cb3d400d66630cfb747457938'
+          Authorization: `Token ${this.state.authToken}`
         }
       });
       commit("loadBoards", data);
@@ -285,7 +290,7 @@ export default createStore({
       console.log("in deleteBoardAsync action");
       await axios.delete(`http://127.0.0.1:8000/boards/${id}/`, {
         headers: {
-          Authorization: 'Token 4e4898303f4ead5cb3d400d66630cfb747457938'
+          Authorization: `Token ${this.state.authToken}`
         }
       });
       commit('deleteBoard', id);
@@ -294,7 +299,7 @@ export default createStore({
       console.log("in createBoardAsync action");
       const { data } = await axios.post(`http://127.0.0.1:8000/boards/`, payload, {
           headers: {
-            Authorization: 'Token 4e4898303f4ead5cb3d400d66630cfb747457938'
+            Authorization: `Token ${this.state.authToken}`
           }
       });
       commit('createBoard', data);
@@ -309,7 +314,7 @@ export default createStore({
       console.log("in updateBoardAsync action");
       const { data } = await axios.put(`http://127.0.0.1:8000/boards/${payload.id}/`, payload, {
         headers: {
-          Authorization: 'Token 4e4898303f4ead5cb3d400d66630cfb747457938'
+          Authorization: `Token ${this.state.authToken}`
         },
       });
       commit('updateBoard', data);
@@ -318,7 +323,7 @@ export default createStore({
       console.log("in loadContainersAsync action");
       const { data } = await axios.get(`http://127.0.0.1:8000/boards/${payload.board_id}/containers/`, {
         headers: {
-          Authorization: 'Token 4e4898303f4ead5cb3d400d66630cfb747457938'
+          Authorization: `Token ${this.state.authToken}`
         }
       });
       commit("loadContainers", data);
@@ -328,7 +333,7 @@ export default createStore({
       // const { data } = await axios.post(`http://127.0.0.1:8000/boards/${payload.board}/containers/`, payload, {
       const { data } = await axios.post(`http://127.0.0.1:8000/boards/${payload.board.id}/containers/`, payload, {
           headers: {
-            Authorization: 'Token 4e4898303f4ead5cb3d400d66630cfb747457938'
+            Authorization: `Token ${this.state.authToken}`
           }
       });
       commit('createContainer', data);
@@ -338,7 +343,7 @@ export default createStore({
       // TODO: change to payload.board.id, or payload.board ?
       const { data } = await axios.get(`http://127.0.0.1:8000/boards/${payload.board_id}/containers/${payload.container_id}/cards/`, {
         headers: {
-          Authorization: 'Token 4e4898303f4ead5cb3d400d66630cfb747457938'
+          Authorization: `Token ${this.state.authToken}`
         }
       });
       commit("loadCards", data);
@@ -346,4 +351,4 @@ export default createStore({
   },
   modules: {
   }
-})
+});
