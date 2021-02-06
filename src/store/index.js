@@ -1,6 +1,10 @@
 import { createStore } from 'vuex';
 import axios from 'axios';
 
+// define VUE_APP_API_BASE in .env under project root like
+// VUE_APP_API_BASE=http://example.com:8000
+const apiBase = process.env.VUE_APP_API_BASE;
+
 export default createStore({
   // enable strict mode for development only (impacts performance)
   strict: true,
@@ -263,12 +267,12 @@ export default createStore({
   actions: {
     async authenticateAsync({ commit }, payload) {
       console.log('in authenticateAsync action');
-      const { data } = await axios.post('http://127.0.0.1:8000/auth/', payload);
+      const { data } = await axios.post(`${apiBase}/auth/`, payload);
       commit('authenticate', data);
     },
     async loadDataAsync({ commit }) {
       console.log('in loadDataAsync action');
-      const { data } = await axios.get('http://127.0.0.1:8000/normalized/', {
+      const { data } = await axios.get(`${apiBase}/normalized/`, {
         headers: {
           Authorization: `Token ${this.state.authToken}`,
         },
@@ -277,7 +281,7 @@ export default createStore({
     },
     async loadBoardsAsync({ commit }) {
       console.log('in loadBoardsAsync action');
-      const { data } = await axios.get('http://127.0.0.1:8000/boards/', {
+      const { data } = await axios.get(`${apiBase}/boards/`, {
         headers: {
           Authorization: `Token ${this.state.authToken}`,
         },
@@ -286,7 +290,7 @@ export default createStore({
     },
     async deleteBoardAsync({ commit }, id) {
       console.log('in deleteBoardAsync action');
-      await axios.delete(`http://127.0.0.1:8000/boards/${id}/`, {
+      await axios.delete(`${apiBase}/boards/${id}/`, {
         headers: {
           Authorization: `Token ${this.state.authToken}`,
         },
@@ -296,7 +300,7 @@ export default createStore({
     async createBoardAsync({ commit }, payload) {
       console.log('in createBoardAsync action');
       const { data } = await axios.post(
-        `http://127.0.0.1:8000/boards/`,
+        `${apiBase}/boards/`,
         payload,
         {
           headers: {
@@ -315,7 +319,7 @@ export default createStore({
       delete payload.attachments;
       console.log('in updateBoardAsync action');
       const { data } = await axios.put(
-        `http://127.0.0.1:8000/boards/${payload.id}/`,
+        `${apiBase}/boards/${payload.id}/`,
         payload,
         {
           headers: {
@@ -328,7 +332,7 @@ export default createStore({
     async loadContainersAsync({ commit }, payload) {
       console.log('in loadContainersAsync action');
       const { data } = await axios.get(
-        `http://127.0.0.1:8000/boards/${payload.board_id}/containers/`,
+        `${apiBase}/boards/${payload.board_id}/containers/`,
         {
           headers: {
             Authorization: `Token ${this.state.authToken}`,
@@ -340,7 +344,7 @@ export default createStore({
     async createContainerAsync({ commit }, payload) {
       console.log('in createContainerAsync action');
       const { data } = await axios.post(
-        `http://127.0.0.1:8000/boards/${payload.board.id}/containers/`,
+        `${apiBase}/boards/${payload.board.id}/containers/`,
         payload,
         {
           headers: {
@@ -354,7 +358,7 @@ export default createStore({
       console.log('in loadCardsAsync action');
       // TODO: change to payload.board.id, or payload.board ?
       const { data } = await axios.get(
-        `http://127.0.0.1:8000/boards/${payload.board_id}/containers/${payload.container_id}/cards/`,
+        `${apiBase}/boards/${payload.board_id}/containers/${payload.container_id}/cards/`,
         {
           headers: {
             Authorization: `Token ${this.state.authToken}`,
