@@ -8,12 +8,17 @@
 </template>
 
 <script>
+import store from '@/store';
+
 export default {
   name: 'App',
   created() {
-    console.log('Loading Data...');
-    this.$store.dispatch('loadDataAsync');
-    console.log('Done loading data');
+    if (store.state.isAuthenticated)
+    {
+      console.log('Loading Data...');
+      this.$store.dispatch('loadDataAsync');
+      console.log('Done loading data');
+    }
   }
 };
 </script>

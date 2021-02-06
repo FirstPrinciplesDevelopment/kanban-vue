@@ -60,6 +60,14 @@ export default {
   components: {
     BoardModal,
   },
+  created() {
+    if (store.state.isAuthenticated)
+    {
+      console.log('Loading Data...');
+      this.$store.dispatch('loadDataAsync');
+      console.log('Done loading data');
+    }
+  },
   computed: {
     boards() {
       return store.state.boards;
