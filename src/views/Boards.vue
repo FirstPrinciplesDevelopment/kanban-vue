@@ -4,7 +4,6 @@
       <tr>
         <th>Name</th>
         <th>Archived</th>
-        <th>Position</th>
         <th></th>
         <th></th>
       </tr>
@@ -15,7 +14,6 @@
           }}</router-link>
         </td>
         <td>{{ board.archived }}</td>
-        <td>{{ board.position }}</td>
         <td>
           <button v-on:click="handleBoardEdit(board)" class="btn btn-primary">
             Edit

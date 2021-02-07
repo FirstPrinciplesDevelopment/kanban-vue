@@ -10,8 +10,6 @@
       <div class="modal-body">
         <div class="create-board">
           <input type="text" v-model="board.name" placeholder="name" />
-          <input type="text" v-model="board.slug" placeholder="slug" />
-          <input type="number" step="1" v-model="board.position" />
         </div>
       </div>
       <div class="modal-footer">
@@ -40,7 +38,7 @@ export default {
   },
   methods: {
     handleBoardSave() {
-      if (this.board.url.length > 0) {
+      if (this.board?.url?.length > 0) {
         // update board
         this.$store.dispatch('updateBoardAsync', this.board);
       } else {

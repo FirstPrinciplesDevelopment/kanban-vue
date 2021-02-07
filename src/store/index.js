@@ -17,7 +17,6 @@ export default createStore({
         url,
         name,
         slug,
-        position,
         containers: [...urls],
         members: [...urls],
         labels: [...urls],
@@ -315,16 +314,23 @@ export default createStore({
         headers: {
           Authorization: `Token ${this.state.authToken}`,
         },
+      }).catch(function (error) {
+        if (error.response) {
+          // Request made and server responded
+          console.log(error.response.data);
+          console.log(error.response.status);
+          console.log(error.response.headers);
+        } else if (error.request) {
+          // The request was made but no response was received
+          console.log(error.request);
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          console.log('Error', error.message);
+        }
       });
       commit('createBoard', data);
     },
     async updateBoardAsync({ commit }, payload) {
-      // TODO: can this be handled more elegantly?
-      // remove array members that can't be handled by API
-      delete payload.containers;
-      delete payload.members;
-      delete payload.labels;
-      delete payload.attachments;
       console.log('in updateBoardAsync action');
       const { data } = await axios.put(`${payload.url}`, payload, {
         headers: {
@@ -345,14 +351,27 @@ export default createStore({
     async createContainerAsync({ commit }, payload) {
       console.log('in createContainerAsync action');
       const { data } = await axios.post(
-        `${payload.board.url}containers/`,
+        `${payload.board}containers/`,
         payload,
         {
           headers: {
             Authorization: `Token ${this.state.authToken}`,
           },
         }
-      );
+      ).catch(function (error) {
+        if (error.response) {
+          // Request made and server responded
+          console.log(error.response.data);
+          console.log(error.response.status);
+          console.log(error.response.headers);
+        } else if (error.request) {
+          // The request was made but no response was received
+          console.log(error.request);
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          console.log('Error', error.message);
+        }
+      });
       commit('createContainer', data);
     },
     async loadCardsAsync({ commit }, payload) {
