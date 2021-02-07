@@ -1,23 +1,32 @@
 <template>
-  <div v-if="card">
+  <div v-if="card" @click="showModal = true">
     <div class="card-component">
       <div class="card-header">{{ card.name }}</div>
       <div>position: {{ card.position }}</div>
       <div>{{ card.content }}</div>
-      <button @click="deleteCardAsync(card.url)" class="btn btn-danger">
-        X
+      <button @click.prevent="deleteCardAsync(card.url)" class="btn btn-danger">
+        Delete
       </button>
     </div>
   </div>
   <div v-else>Loading...</div>
+  <CardModal
+    :initialCard="card"
+    v-on:close="showModal = false"
+    v-if="showModal"
+  />
 </template>
 
 <script>
 import { mapActions } from 'vuex';
+import CardModal from '@/components/CardModal.vue';
 
 export default {
   name: 'Card',
   props: ['cardProp'],
+  data() {
+    return { showModal: false };
+  },
   computed: {
     card() {
       return this.$store.getters.getCardByUrl(this.cardProp.url);
@@ -25,6 +34,9 @@ export default {
   },
   methods: {
     ...mapActions(['updateCardAsync', 'deleteCardAsync']),
+  },
+  components: {
+    CardModal,
   },
 };
 </script>

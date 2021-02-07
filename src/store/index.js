@@ -395,6 +395,15 @@ export default createStore({
         });
       commit('createContainer', data);
     },
+    async updateContainerAsync({ commit }, payload) {
+      console.log('in updateContainerAsync action');
+      const { data } = await axios.put(`${payload.url}`, payload, {
+        headers: {
+          Authorization: `Token ${this.state.authToken}`,
+        },
+      });
+      commit('updateContainer', data);
+    },
     async loadCardsAsync({ commit }, payload) {
       console.log('in loadCardsAsync action');
       const { data } = await axios.get(`${payload.container_url}cards/`, {
@@ -437,6 +446,15 @@ export default createStore({
           }
         });
       commit('createCard', data);
+    },
+    async updateCardAsync({ commit }, payload) {
+      console.log('in updateCardAsync action');
+      const { data } = await axios.put(`${payload.url}`, payload, {
+        headers: {
+          Authorization: `Token ${this.state.authToken}`,
+        },
+      });
+      commit('updateCard', data);
     },
   },
   modules: {},
