@@ -105,7 +105,7 @@ export default createStore({
     getContainersByBoardUrl: (state) => (board_url) => {
       var result = [];
       for (const url of state.containerList) {
-        if (state.containers[url].board.url === board_url) {
+        if (state.containers[url].board === board_url) {
           result.push(state.containers[url]);
         }
       }
@@ -115,7 +115,13 @@ export default createStore({
       return state.containers[url];
     },
     getCardsByContainerUrl: (state) => (container_url) => {
-      return state.cards.filter((x) => (x.container.url = container_url));
+      var result = [];
+      for (const url of state.cardList) {
+        if (state.cards[url].container === container_url) {
+          result.push(state.cards[url]);
+        }
+      }
+      return result;
     },
     getCardByUrl: (state) => (url) => {
       return state.cards[url];

@@ -2,7 +2,7 @@
   <div v-if="container">
     <div class="container-component">
       <h2>{{ container.name }}</h2>
-      <div v-for="card in container.cards" v-bind:key="card.url">
+      <div v-for="card in cards" v-bind:key="card.url">
         <Card :cardProp="card" />
       </div>
     </div>
@@ -20,6 +20,9 @@ export default {
     container() {
       return this.$store.getters.getContainerByUrl(this.containerProp.url);
     },
+    cards() {
+      return this.$store.getters.getCardsByContainerUrl(this.container.url);
+    }
   },
   components: {
     Card,
