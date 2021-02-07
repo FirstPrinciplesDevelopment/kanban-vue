@@ -143,6 +143,14 @@ export default createStore({
       console.log('loadData mutation');
       console.log('data from API:');
       console.log(data);
+      // reset state before adding new data
+      state.boards = {};
+      state.boardList = [];
+      state.boardSlugMap = {};
+      state.containers = {};
+      state.containerList = [];
+      state.cards = {};
+      state.cardList = [];
       // set boards
       for (const board of data['boards']) {
         state.boards[board.url] = board;
