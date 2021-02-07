@@ -39,6 +39,10 @@ body {
   background-color: #0d1117;
 }
 
+a {
+  color:#00bfff;
+}
+
 #nav {
   padding: 30px;
 }
