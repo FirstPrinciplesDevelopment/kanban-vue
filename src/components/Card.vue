@@ -2,15 +2,19 @@
   <div v-if="card">
     <div class="card-component">
       <div class="card-header">{{ card.name }}</div>
-      <div>url: {{ card.url }}</div>
       <div>position: {{ card.position }}</div>
       <div>{{ card.content }}</div>
+      <button @click="deleteCardAsync(card.url)" class="btn btn-danger">
+        X
+      </button>
     </div>
   </div>
   <div v-else>Loading...</div>
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+
 export default {
   name: 'Card',
   props: ['cardProp'],
@@ -18,6 +22,9 @@ export default {
     card() {
       return this.$store.getters.getCardByUrl(this.cardProp.url);
     },
+  },
+  methods: {
+    ...mapActions(['updateCardAsync', 'deleteCardAsync']),
   },
 };
 </script>

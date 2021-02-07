@@ -1,7 +1,7 @@
 <template>
   <div class="board">
     <div v-if="board">
-      <span>{{ board.name }}</span>
+      <h2>{{ board.name }}</h2>
       <div class="row">
         <!--Container List-->
         <div
@@ -26,14 +26,11 @@
         </div>
       </div>
     </div>
-    <div v-else>
-      Loading...
-    </div>
+    <div v-else>Loading...</div>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
 import Container from '@/components/Container.vue';
 
 export default {

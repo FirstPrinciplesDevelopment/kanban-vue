@@ -12,6 +12,15 @@
         <Card :cardProp="card" />
       </div>
     </div>
+    <!--New Card-->
+    <div class="col">
+      <div class="card-create">
+        <input type="text" v-model="newCard.name" placeholder="New Card" />
+        <button class="btn btn-success" v-on:click="createCard">
+          Add Card
+        </button>
+      </div>
+    </div>
   </div>
   <div v-else>Loading...</div>
 </template>
@@ -23,6 +32,9 @@ import { mapActions } from 'vuex';
 export default {
   name: 'Container',
   props: ['containerProp'],
+  data() {
+    return { newCard: { name: '' } };
+  },
   computed: {
     container() {
       return this.$store.getters.getContainerByUrl(this.containerProp.url);
@@ -32,6 +44,16 @@ export default {
     },
   },
   methods: {
+    createCard() {
+      console.log('creating Card');
+      this.newCard['container'] = this.container.url;
+      this.$store.dispatch('createCardAsync', this.newCard);
+      // reset the new card
+      this.newCard = {
+        name: '',
+        container: this.container.url,
+      };
+    },
     ...mapActions(['updateContainerAsync', 'deleteContainerAsync']),
   },
   components: {

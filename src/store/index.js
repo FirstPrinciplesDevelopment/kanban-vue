@@ -206,7 +206,7 @@ export default createStore({
       console.log('deleteBoard mutation');
       console.log(url);
       // lookup the board's slug to delete the slug -> url mapping
-      delete state.boardSlugMap[state.boards[url].slug]
+      delete state.boardSlugMap[state.boards[url].slug];
       // delete a board, which is a key: {value} on the boards object
       delete state.boards[url];
       // delete url from boardList
@@ -403,6 +403,40 @@ export default createStore({
         },
       });
       commit('loadCards', data);
+    },
+    async deleteCardAsync({ commit }, url) {
+      console.log('in deleteCardAsync action');
+      await axios.delete(`${url}`, {
+        headers: {
+          Authorization: `Token ${this.state.authToken}`,
+        },
+      });
+      commit('deleteCard', url);
+    },
+    async createCardAsync({ commit }, payload) {
+      console.log('in createCardAsync action');
+      const { data } = await axios
+        .post(`${payload.container}cards/`, payload, {
+          headers: {
+            Authorization: `Token ${this.state.authToken}`,
+          },
+        })
+        .catch(function(error) {
+          // TODO: decompose
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
+        });
+      commit('createCard', data);
     },
   },
   modules: {},
