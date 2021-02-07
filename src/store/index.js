@@ -205,8 +205,11 @@ export default createStore({
     deleteBoard(state, url) {
       console.log('deleteBoard mutation');
       console.log(url);
+      // lookup the board's slug to delete the slug -> url mapping
+      delete state.boardSlugMap[state.boards[url].slug]
       // delete a board, which is a key: {value} on the boards object
       delete state.boards[url];
+      // delete url from boardList
       const index = state.boardList.indexOf(url);
       state.boardList.splice(index, 1);
     },
@@ -239,6 +242,7 @@ export default createStore({
       console.log(url);
       // delete a container, which is a key: {value} on the containers object
       delete state.containers[url];
+      // delete url form containerList
       const index = state.containerList.indexOf(url);
       state.containerList.splice(index, 1);
     },
@@ -357,6 +361,15 @@ export default createStore({
         },
       });
       commit('loadContainers', data);
+    },
+    async deleteContainerAsync({ commit }, url) {
+      console.log('in deleteContainerAsync action');
+      await axios.delete(`${url}`, {
+        headers: {
+          Authorization: `Token ${this.state.authToken}`,
+        },
+      });
+      commit('deleteContainer', url);
     },
     async createContainerAsync({ commit }, payload) {
       console.log('in createContainerAsync action');

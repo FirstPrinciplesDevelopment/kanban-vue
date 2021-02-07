@@ -2,6 +2,12 @@
   <div v-if="container">
     <div class="container-component">
       <h2>{{ container.name }}</h2>
+      <button
+        @click="deleteContainerAsync(container.url)"
+        class="btn btn-danger"
+      >
+        Delete Container
+      </button>
       <div v-for="card in cards" v-bind:key="card.url">
         <Card :cardProp="card" />
       </div>
@@ -12,6 +18,7 @@
 
 <script>
 import Card from '@/components/Card.vue';
+import { mapActions } from 'vuex';
 
 export default {
   name: 'Container',
@@ -22,7 +29,10 @@ export default {
     },
     cards() {
       return this.$store.getters.getCardsByContainerUrl(this.container.url);
-    }
+    },
+  },
+  methods: {
+    ...mapActions(['updateContainerAsync', 'deleteContainerAsync']),
   },
   components: {
     Card,
