@@ -6,7 +6,7 @@
         <!--Container List-->
         <div
           v-for="container in containers"
-          v-bind:key="container.id"
+          v-bind:key="container.url"
           class="col"
         >
           <Container :containerProp="container" />
@@ -38,40 +38,29 @@ import Container from '@/components/Container.vue';
 
 export default {
   name: 'Board',
-  props: ['id'],
+  props: ['slug'],
   data() {
     return { newContainer: { name: '' } };
   },
   computed: {
     board() {
-      return this.$store.getters.getBoardById(this.id);
+      return this.$store.getters.getBoardBySlug(this.slug);
     },
     containers() {
-      return this.$store.getters.getContainersByBoardId(this.id);
+      return this.$store.getters.getContainersByBoardUrl(this.board.url);
     },
   },
   methods: {
     createContainer() {
       console.log('creating Container');
-      // TODO: fix this hardcoded mess - can the server side handle some of these?
-      this.newContainer['board'] = {
-        url: this.board.url,
-        id: this.board.id,
-        name: this.board.name,
-      };
+      this.newContainer['board'] = this.board.url;
       this.newContainer['archived'] = false;
-      this.newContainer['position'] = 7;
       this.$store.dispatch('createContainerAsync', this.newContainer);
       // reset new container
       this.newContainer = {
         name: '',
-        board: {
-          url: this.board.url,
-          id: this.board.id,
-          name: this.board.name,
-        },
+        board: this.board.url,
         archived: false,
-        position: 0,
       };
     },
   },

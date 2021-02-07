@@ -18,7 +18,7 @@ export default {
   props: ['containerProp'],
   computed: {
     container() {
-      return this.$store.getters.getContainerById(this.containerProp.id);
+      return this.$store.getters.getContainerByUrl(this.containerProp.url);
     },
   },
   components: {

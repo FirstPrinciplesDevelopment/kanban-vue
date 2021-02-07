@@ -40,7 +40,7 @@ export default {
   },
   methods: {
     handleBoardSave() {
-      if (this.board.id > 0) {
+      if (this.board.url.length > 0) {
         // update board
         this.$store.dispatch('updateBoardAsync', this.board);
       } else {

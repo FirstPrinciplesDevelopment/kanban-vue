@@ -8,9 +8,11 @@
         <th></th>
         <th></th>
       </tr>
-      <tr v-for="board in boards" v-bind:key="board.id">
+      <tr v-for="board in boards" v-bind:key="board.url">
         <td>
-          <router-link :to="'/board/' + board.id">{{ board.name }}</router-link>
+          <router-link :to="'/board/' + board.slug">{{
+            board.name
+          }}</router-link>
         </td>
         <td>{{ board.archived }}</td>
         <td>{{ board.position }}</td>
@@ -21,7 +23,7 @@
         </td>
         <td>
           <button
-            v-on:click="deleteBoardAsync(board.id)"
+            v-on:click="deleteBoardAsync(board.url)"
             class="btn btn-danger"
           >
             Delete
@@ -61,8 +63,7 @@ export default {
     BoardModal,
   },
   created() {
-    if (store.state.isAuthenticated)
-    {
+    if (store.state.isAuthenticated) {
       console.log('Loading Data...');
       this.$store.dispatch('loadDataAsync');
       console.log('Done loading data');

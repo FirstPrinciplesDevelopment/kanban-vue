@@ -2,7 +2,7 @@
   <div v-if="container">
     <div class="container-component">
       <h2>{{ container.name }}</h2>
-      <div v-for="card in container.cards" v-bind:key="card.id">
+      <div v-for="card in container.cards" v-bind:key="card.url">
         <Card :cardProp="card" />
       </div>
     </div>
@@ -18,7 +18,7 @@ export default {
   props: ['containerProp'],
   computed: {
     container() {
-      return this.$store.getters.getContainerById(this.containerProp.id);
+      return this.$store.getters.getContainerByUrl(this.containerProp.url);
     },
   },
   components: {

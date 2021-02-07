@@ -2,7 +2,7 @@
   <div v-if="card">
     <div class="card-component">
       <div class="card-header">{{ card.name }}</div>
-      <div>id: {{ card.id }}</div>
+      <div>url: {{ card.url }}</div>
       <div>position: {{ card.position }}</div>
       <div>{{ card.content }}</div>
     </div>
@@ -16,7 +16,7 @@ export default {
   props: ['cardProp'],
   computed: {
     card() {
-      return this.$store.getters.getCardById(this.cardProp.id);
+      return this.$store.getters.getCardByUrl(this.cardProp.url);
     },
   },
 };

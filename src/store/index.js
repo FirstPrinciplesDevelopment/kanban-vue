@@ -13,15 +13,14 @@ export default createStore({
     isAuthenticated: false,
     boards: {
       /*
-      id: {
+      url: {
         url,
-        id,
         name,
         slug,
         position,
-        containers: [...ids],
-        members: [...ids],
-        labels: [...ids],
+        containers: [...urls],
+        members: [...urls],
+        labels: [...urls],
         attachments,
         created_by,
         created_time,
@@ -34,20 +33,22 @@ export default createStore({
       */
     },
     boardList: [
-      // ...ids
+      // ...urls
     ],
+    boardSlugMap: {
+      // "slug": "url",
+    },
     containers: {
       /*
-      id: {
+      url: {
         url,
-        id,
-        board,  // id
+        board,  // url
         name,
         slug,
         position,
-        cards: [...ids],
-        labels: [...ids],
-        tags: [...ids],
+        cards: [...urls],
+        labels: [...urls],
+        tags: [...urls],
         created_by,
         created_time,
         changed_by,
@@ -59,15 +60,13 @@ export default createStore({
       */
     },
     containerList: [
-      // ...ids
+      // ...urls
     ],
     cards: {
       /*
-      id: {
+      url: {
         url,
-        id,
-        board,  // id
-        container,  // id
+        container,  // url
         name,
         slug,
         content,
@@ -76,10 +75,10 @@ export default createStore({
         complexity,
         hours,
         position,
-        assigned_users: [...ids],
-        labels: [...ids],
-        tags: [...ids],
-        attachments: [...ids],
+        assigned_users: [...urls],
+        labels: [...urls],
+        tags: [...urls],
+        attachments: [...urls],
         created_by,
         created_time,
         changed_by,
@@ -91,30 +90,35 @@ export default createStore({
       */
     },
     cardList: [
-      // ...ids
+      // ...urls
     ],
   },
   getters: {
-    getBoardById: (state) => (id) => {
-      return state.boards[id];
+    // getters provide access to vuex state, they DO NOT call APIs
+    getBoardByUrl: (state) => (url) => {
+      return state.boards[url];
     },
-    getContainersByBoardId: (state) => (board_id) => {
+    getBoardBySlug: (state, getters) => (slug) => {
+      const url = state.boardSlugMap[slug];
+      return getters.getBoardByUrl(url);
+    },
+    getContainersByBoardUrl: (state) => (board_url) => {
       var result = [];
-      for (const id of state.containerList) {
-        if (state.containers[id].board.id == board_id) {
-          result.push(state.containers[id]);
+      for (const url of state.containerList) {
+        if (state.containers[url].board.url === board_url) {
+          result.push(state.containers[url]);
         }
       }
       return result;
     },
-    getContainerById: (state) => (id) => {
-      return state.containers[id];
+    getContainerByUrl: (state) => (url) => {
+      return state.containers[url];
     },
-    getCardsByContainerId: (state) => (container_id) => {
-      return state.cards.filter((x) => (x.container.id = container_id));
+    getCardsByContainerUrl: (state) => (container_url) => {
+      return state.cards.filter((x) => (x.container.url = container_url));
     },
-    getCardById: (state) => (id) => {
-      return state.cards[id];
+    getCardByUrl: (state) => (url) => {
+      return state.cards[url];
     },
   },
   mutations: {
@@ -136,33 +140,34 @@ export default createStore({
       console.log(data);
       // set boards
       for (const board of data['boards']) {
-        state.boards[board.id] = board;
-        state.boardList.push(board.id);
+        state.boards[board.url] = board;
+        state.boardList.push(board.url);
+        state.boardSlugMap[board.slug] = board.url;
       }
       // set containers
       for (const container of data['containers']) {
-        state.containers[container.id] = container;
-        state.containerList.push(container.id);
+        state.containers[container.url] = container;
+        state.containerList.push(container.url);
       }
       // set cards
       for (const card of data['cards']) {
-        state.cards[card.id] = card;
-        state.cardList.push(card.id);
+        state.cards[card.url] = card;
+        state.cardList.push(card.url);
       }
       // // set labels
       // for (const label of data["labels"]) {
-      //   state.labels[label.id] = label;
-      //   state.labelList.push(label.id);
+      //   state.labels[label.url] = label;
+      //   state.labelList.push(label.url);
       // }
       // // set tags
       // for (const tag in data["tags"]) {
-      //   state.tag[tag.id] = tag;
-      //   state.tagList.push(tag.id);
+      //   state.tag[tag.url] = tag;
+      //   state.tagList.push(tag.url);
       // }
       // // set members
       // for (const member in data["members"]) {
-      //   state.members[member.id] = member;
-      //   state.memberList.push(member.id);
+      //   state.members[member.url] = member;
+      //   state.memberList.push(member.url);
       // }
       console.log('Data in state:');
       console.log(state);
@@ -170,98 +175,99 @@ export default createStore({
     loadBoards(state, data) {
       console.log('loadBoards mutation');
       console.log(data);
-      // maintain boards in state like Array [ board_id : {board_object}, ...]
+      // maintain boards in state like Array [ board_url : {board_object}, ...]
       for (const board of data) {
-        state.boards[board.id] = board;
-        state.boardList.push(board.id);
+        state.boards[board.url] = board;
+        state.boardList.push(board.url);
+        state.boardSlugMap[board.slug] = board.url;
       }
     },
     createBoard(state, data) {
       console.log('createBoard mutation');
       console.log(data);
-      // add a board to state like boards[board_id] : {board_object}
-      state.boards[data.id] = data;
-      state.boardList.push(data.id);
+      // add a board to state like boards[board_url] : {board_object}
+      state.boards[data.url] = data;
+      state.boardList.push(data.url);
     },
-    deleteBoard(state, id) {
+    deleteBoard(state, url) {
       console.log('deleteBoard mutation');
-      console.log(id);
+      console.log(url);
       // delete a board, which is a key: {value} on the boards object
-      delete state.boards[id];
-      const index = state.boardList.indexOf(id);
+      delete state.boards[url];
+      const index = state.boardList.indexOf(url);
       state.boardList.splice(index, 1);
     },
     updateBoard(state, data) {
       // identical to createBoard, but may be extended in the future
       console.log('updateBoard mutation');
       console.log(data);
-      // update a board in state like boards[board_id] : {board_object}
-      state.boards[data.id] = data;
-      // no need to update state.boardList - the id cannot change
+      // update a board in state like boards[board_url] : {board_object}
+      state.boards[data.url] = data;
+      // no need to update state.boardList - the url cannot change
     },
     loadContainers(state, data) {
       console.log('loadContainers mutation');
       console.log(data);
-      // maintain containers in state like Array [ container_id : {container_object}, ...]
+      // maintain containers in state like Array [ container_url : {container_object}, ...]
       for (const container of data) {
-        state.containers[container.id] = container;
-        state.containerList.push(container.id);
+        state.containers[container.url] = container;
+        state.containerList.push(container.url);
       }
     },
     createContainer(state, data) {
       console.log('createContainer mutation');
       console.log(data);
-      // add a container to state like containers[container_id] : {container_object}
-      state.containers[data.id] = data;
-      state.containerList.push(data.id);
+      // add a container to state like containers[container_url] : {container_object}
+      state.containers[data.url] = data;
+      state.containerList.push(data.url);
     },
-    deleteContainer(state, id) {
+    deleteContainer(state, url) {
       console.log('deleteContainer mutation');
-      console.log(id);
+      console.log(url);
       // delete a container, which is a key: {value} on the containers object
-      delete state.containers[id];
-      const index = state.containerList.indexOf(id);
+      delete state.containers[url];
+      const index = state.containerList.indexOf(url);
       state.containerList.splice(index, 1);
     },
     updateContainer(state, data) {
       // identical to createContainer, but may be extended in the future
       console.log('updateContainer mutation');
       console.log(data);
-      // update a container in state like containers[container_id] : {container_object}
-      state.containers[data.id] = data;
-      // no need to update state.containerList - the id cannot change
+      // update a container in state like containers[container_url] : {container_object}
+      state.containers[data.url] = data;
+      // no need to update state.containerList - the url cannot change
     },
     loadCards(state, data) {
       console.log('loadCards mutation');
       console.log(data);
-      // maintain cards in state like Array [ card_id : {card_object}, ...]
+      // maintain cards in state like Array [ card_url : {card_object}, ...]
       for (const card of data) {
-        state.cards[card.id] = card;
-        state.cardList.push(card.id);
+        state.cards[card.url] = card;
+        state.cardList.push(card.url);
       }
     },
     createCard(state, data) {
       console.log('createCard mutation');
       console.log(data);
-      // add a card to state like cards[card_id] : {card_object}
-      state.cards[data.id] = data;
-      state.cardList.push(data.id);
+      // add a card to state like cards[card_url] : {card_object}
+      state.cards[data.url] = data;
+      state.cardList.push(data.url);
     },
-    deleteCard(state, id) {
+    deleteCard(state, url) {
       console.log('deleteCard mutation');
-      console.log(id);
+      console.log(url);
       // delete a card, which is a key: {value} on the cards object
-      delete state.cards[id];
-      const index = state.cardList.indexOf(id);
+      delete state.cards[url];
+      const index = state.cardList.indexOf(url);
       state.cardList.splice(index, 1);
     },
     updateCard(state, data) {
       // identical to createCard, but may be extended in the future
       console.log('updateCard mutation');
       console.log(data);
-      // update a card in state like cards[card_id] : {card_object}
-      state.cards[data.id] = data;
-      // no need to update state.cardList - the id cannot change
+      // update a card in state like cards[card_url] : {card_object}
+      state.cards[data.url] = data;
+      // no need to update state.cardList - the url cannot change
     },
   },
   actions: {
@@ -288,26 +294,22 @@ export default createStore({
       });
       commit('loadBoards', data);
     },
-    async deleteBoardAsync({ commit }, id) {
+    async deleteBoardAsync({ commit }, url) {
       console.log('in deleteBoardAsync action');
-      await axios.delete(`${apiBase}/boards/${id}/`, {
+      await axios.delete(`${url}`, {
         headers: {
           Authorization: `Token ${this.state.authToken}`,
         },
       });
-      commit('deleteBoard', id);
+      commit('deleteBoard', url);
     },
     async createBoardAsync({ commit }, payload) {
       console.log('in createBoardAsync action');
-      const { data } = await axios.post(
-        `${apiBase}/boards/`,
-        payload,
-        {
-          headers: {
-            Authorization: `Token ${this.state.authToken}`,
-          },
-        }
-      );
+      const { data } = await axios.post(`${apiBase}/boards/`, payload, {
+        headers: {
+          Authorization: `Token ${this.state.authToken}`,
+        },
+      });
       commit('createBoard', data);
     },
     async updateBoardAsync({ commit }, payload) {
@@ -318,33 +320,26 @@ export default createStore({
       delete payload.labels;
       delete payload.attachments;
       console.log('in updateBoardAsync action');
-      const { data } = await axios.put(
-        `${apiBase}/boards/${payload.id}/`,
-        payload,
-        {
-          headers: {
-            Authorization: `Token ${this.state.authToken}`,
-          },
-        }
-      );
+      const { data } = await axios.put(`${payload.url}`, payload, {
+        headers: {
+          Authorization: `Token ${this.state.authToken}`,
+        },
+      });
       commit('updateBoard', data);
     },
     async loadContainersAsync({ commit }, payload) {
       console.log('in loadContainersAsync action');
-      const { data } = await axios.get(
-        `${apiBase}/boards/${payload.board_id}/containers/`,
-        {
-          headers: {
-            Authorization: `Token ${this.state.authToken}`,
-          },
-        }
-      );
+      const { data } = await axios.get(`${payload.board_url}containers/`, {
+        headers: {
+          Authorization: `Token ${this.state.authToken}`,
+        },
+      });
       commit('loadContainers', data);
     },
     async createContainerAsync({ commit }, payload) {
       console.log('in createContainerAsync action');
       const { data } = await axios.post(
-        `${apiBase}/boards/${payload.board.id}/containers/`,
+        `${payload.board.url}containers/`,
         payload,
         {
           headers: {
@@ -356,15 +351,11 @@ export default createStore({
     },
     async loadCardsAsync({ commit }, payload) {
       console.log('in loadCardsAsync action');
-      // TODO: change to payload.board.id, or payload.board ?
-      const { data } = await axios.get(
-        `${apiBase}/boards/${payload.board_id}/containers/${payload.container_id}/cards/`,
-        {
-          headers: {
-            Authorization: `Token ${this.state.authToken}`,
-          },
-        }
-      );
+      const { data } = await axios.get(`${payload.container_url}cards/`, {
+        headers: {
+          Authorization: `Token ${this.state.authToken}`,
+        },
+      });
       commit('loadCards', data);
     },
   },

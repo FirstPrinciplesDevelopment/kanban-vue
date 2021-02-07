@@ -27,7 +27,7 @@ const routes = [
     props: true,
   },
   {
-    path: '/board/:id',
+    path: '/board/:slug',
     name: 'Board',
     component: Board,
     props: true,
