@@ -54,13 +54,11 @@ export default {
     createContainer() {
       console.log('creating Container');
       this.newContainer['board'] = this.board.url;
-      this.newContainer['archived'] = false;
       this.$store.dispatch('createContainerAsync', this.newContainer);
       // reset new container
       this.newContainer = {
         name: '',
         board: this.board.url,
-        archived: false,
       };
     },
   },

@@ -42,8 +42,6 @@ export default {
         // update board
         this.$store.dispatch('updateBoardAsync', this.board);
       } else {
-        // TODO: move this logic elsewhere
-        this.board.archived = false;
         // create board
         this.$store.dispatch('createBoardAsync', this.board);
       }
