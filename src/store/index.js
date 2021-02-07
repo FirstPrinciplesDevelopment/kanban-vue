@@ -318,24 +318,26 @@ export default createStore({
     },
     async createBoardAsync({ commit }, payload) {
       console.log('in createBoardAsync action');
-      const { data } = await axios.post(`${apiBase}/boards/`, payload, {
-        headers: {
-          Authorization: `Token ${this.state.authToken}`,
-        },
-      }).catch(function (error) {
-        if (error.response) {
-          // Request made and server responded
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        } else if (error.request) {
-          // The request was made but no response was received
-          console.log(error.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log('Error', error.message);
-        }
-      });
+      const { data } = await axios
+        .post(`${apiBase}/boards/`, payload, {
+          headers: {
+            Authorization: `Token ${this.state.authToken}`,
+          },
+        })
+        .catch(function(error) {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
+        });
       commit('createBoard', data);
     },
     async updateBoardAsync({ commit }, payload) {
@@ -358,28 +360,26 @@ export default createStore({
     },
     async createContainerAsync({ commit }, payload) {
       console.log('in createContainerAsync action');
-      const { data } = await axios.post(
-        `${payload.board}containers/`,
-        payload,
-        {
+      const { data } = await axios
+        .post(`${payload.board}containers/`, payload, {
           headers: {
             Authorization: `Token ${this.state.authToken}`,
           },
-        }
-      ).catch(function (error) {
-        if (error.response) {
-          // Request made and server responded
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        } else if (error.request) {
-          // The request was made but no response was received
-          console.log(error.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log('Error', error.message);
-        }
-      });
+        })
+        .catch(function(error) {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
+        });
       commit('createContainer', data);
     },
     async loadCardsAsync({ commit }, payload) {
