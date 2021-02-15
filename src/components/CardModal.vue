@@ -1,23 +1,26 @@
 <template>
-  <!-- The Board Modal -->
-  <div id="board-modal" class="modal">
+  <!-- The Card Modal -->
+  <div id="card-modal" class="modal">
     <!-- Modal content -->
     <div class="modal-content">
       <div class="modal-header">
-        <span class="close">&times;</span>
-        <h2>Modal Header</h2>
+        <span class="close" @click="$emit('close')">&times;</span>
+        <input type="text" v-model="card.name" placeholder="name" />
       </div>
       <div class="modal-body">
-        <div class="create-board">
-          <input type="text" v-model="board.name" placeholder="name" />
-        </div>
+        <textarea
+          rows="25"
+          cols="55"
+          v-model="card.content"
+          placeholder="content"
+        />
       </div>
       <div class="modal-footer">
         <h3>Modal Footer</h3>
-        <button class="btn btn-primary" v-on:click="handleBoardSave">
+        <button class="btn btn-primary" @click="handleCardSave">
           Save
         </button>
-        <button class="btn btn-danger" v-on:click="$emit('close')">
+        <button class="btn btn-danger" @click="$emit('close')">
           Cancel
         </button>
       </div>
@@ -29,26 +32,26 @@
 import _ from 'lodash';
 
 export default {
-  name: 'BoardModal',
-  props: ['initialBoard'],
+  name: 'CardModal',
+  props: ['initialCard'],
   data() {
     return {
-      board: _.clone(this.initialBoard),
+      card: _.clone(this.initialCard),
     };
   },
   methods: {
-    handleBoardSave() {
-      if (this.board?.url?.length > 0) {
-        // update board
-        this.$store.dispatch('updateBoardAsync', this.board);
+    handleCardSave() {
+      if (this.card?.url?.length > 0) {
+        // update card
+        this.$store.dispatch('updateCardAsync', this.card);
       } else {
-        // create board
-        this.$store.dispatch('createBoardAsync', this.board);
+        // create card
+        this.$store.dispatch('createCardAsync', this.card);
       }
       // close modal
       this.$emit('close');
       // reset local state
-      this.board = {};
+      this.card = {};
     },
   },
 };
@@ -122,7 +125,8 @@ export default {
   margin: auto;
   padding: 0;
   border: 1px solid #888;
-  width: 50%;
+  width: 45%;
+  height: 60%;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   animation-name: animatetop;
   animation-duration: 0.4s;

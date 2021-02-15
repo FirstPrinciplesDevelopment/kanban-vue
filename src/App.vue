@@ -7,6 +7,22 @@
   <router-view/>
 </template>
 
+<script>
+import store from '@/store';
+
+export default {
+  name: 'App',
+  created() {
+    if (store.state.isAuthenticated)
+    {
+      console.log('Loading Data...');
+      this.$store.dispatch('loadDataAsync');
+      console.log('Done loading data');
+    }
+  }
+};
+</script>
+
 <style>
 /* global style */
 #app {
@@ -20,7 +36,11 @@
 
 body {
   color: #10cc39;
-  background-color: #33333f;
+  background-color: #0d1117;
+}
+
+a {
+  color:#00bfff;
 }
 
 #nav {

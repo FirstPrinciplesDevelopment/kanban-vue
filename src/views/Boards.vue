@@ -1,34 +1,52 @@
 <template>
   <div class="boards">
     <table id="board-table">
-        <tr>
-            <th>Name</th>
-            <th>Archived</th>
-            <th>Position</th>
-            <th></th>
-            <th></th>
-        </tr>
-        <tr v-for="board in boards" v-bind:key="board.url">
-            <td>{{ board.name }}</td>
-            <td>{{ board.archived }}</td>
-            <td>{{ board.position }}</td>
-            <td><button v-on:click="handleBoardEdit(board)" class="btn btn-primary">Edit</button></td>
-            <td><button v-on:click="deleteBoardAsync(board.id)" class="btn btn-danger">Delete</button></td>
-        </tr>
+      <tr>
+        <th>Name</th>
+        <th>Archived</th>
+        <th></th>
+        <th></th>
+      </tr>
+      <tr v-for="board in boards" v-bind:key="board.url">
+        <td>
+          <router-link :to="'/board/' + board.slug">{{
+            board.name
+          }}</router-link>
+        </td>
+        <td>{{ board.archived }}</td>
+        <td>
+          <button v-on:click="handleBoardEdit(board)" class="btn btn-primary">
+            Edit
+          </button>
+        </td>
+        <td>
+          <button
+            v-on:click="deleteBoardAsync(board.url)"
+            class="btn btn-danger"
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
     </table>
+
     <div>
-      <BoardModal :initialBoard="selectedBoard" 
-                  v-on:close="showModal = false"
-                  v-if="showModal"/>
-      <button class="btn btn-primary" v-on:click="handleBoardCreate">New Board</button>
+      <BoardModal
+        :initialBoard="selectedBoard"
+        v-on:close="showModal = false"
+        v-if="showModal"
+      />
+      <button class="btn btn-primary" v-on:click="handleBoardCreate">
+        New Board
+      </button>
     </div>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import store from '@/store'
-import BoardModal from '@/components/BoardModal.vue'
+import store from '@/store';
+import BoardModal from '@/components/BoardModal.vue';
 import { mapActions } from 'vuex';
 
 export default {
@@ -36,36 +54,36 @@ export default {
   data() {
     return {
       showModal: false,
-      selectedBoard: {}
-    }
+      selectedBoard: {},
+    };
   },
   components: {
-    BoardModal
+    BoardModal,
   },
-  computed: {
-    boards () {
-      return store.state.boards;
+  created() {
+    if (store.state.isAuthenticated) {
+      console.log('Loading Data...');
+      this.$store.dispatch('loadDataAsync');
+      console.log('Done loading data');
     }
   },
+  computed: {
+    boards() {
+      return store.state.boards;
+    },
+  },
   methods: {
-    handleBoardEdit (board) {
-      console.log("handling board save");
+    handleBoardEdit(board) {
+      console.log('handling board save');
       this.selectedBoard = board;
       this.showModal = true;
     },
-    handleBoardCreate () {
-      console.log("handling board create");
+    handleBoardCreate() {
+      console.log('handling board create');
       this.selectedBoard = {};
       this.showModal = true;
     },
-    ...mapActions([
-      'deleteBoardAsync'
-    ])
+    ...mapActions(['deleteBoardAsync']),
   },
-  created: function () {
-      console.log("Loading Boards...");
-      store.dispatch('loadBoardsAsync');
-      console.log("Done loading Boards");
-  }
-}
+};
 </script>
