@@ -93,7 +93,7 @@ export default createStore({
     ],
   },
   getters: {
-    // getters provide access to vuex state, they DO NOT call APIs
+    // getters provide access to vuex state, they DO NOT call APIs or change vuex state
     getBoardByUrl: (state) => (url) => {
       return state.boards[url];
     },
@@ -449,12 +449,15 @@ export default createStore({
     },
     async updateCardAsync({ commit }, payload) {
       console.log('in updateCardAsync action');
-      const { data } = await axios.put(`${payload.url}`, payload, {
-        headers: {
-          Authorization: `Token ${this.state.authToken}`,
-        },
-      });
-      commit('updateCard', data);
+      await axios
+        .put(`${payload.url}`, payload, {
+          headers: {
+            Authorization: `Token ${this.state.authToken}`,
+          },
+        })
+        .then(({ data }) => {
+          commit('updateCard', data);
+        });
     },
   },
   modules: {},
