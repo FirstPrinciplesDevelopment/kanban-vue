@@ -12,7 +12,8 @@ import store from '@/store';
 
 export default {
   name: 'App',
-  created() {
+  async created() {
+    await this.$store.dispatch('getApiRoutesAsync');
     if (store.state.isAuthenticated)
     {
       console.log('Loading Data...');

@@ -13,7 +13,7 @@
         v-bind:key="card.url"
         v-bind:id="container.url"
         @drop.prevent="drop($event)"
-        @dragover.prevent="notify"
+        @dragover.prevent=""
       >
         <Card :cardProp="card" />
       </div>
@@ -55,10 +55,10 @@ export default {
     };
   },
   methods: {
-    createCard() {
+    async createCard() {
       console.log('creating Card');
       this.newCard['container'] = this.container.url;
-      this.createCardAsync(this.newCard);
+      await this.createCardAsync(this.newCard);
       // reset the new card
       this.newCard = {
         name: '',
@@ -77,9 +77,6 @@ export default {
       cardCopy.container = this.containerProp.url;
       await this.updateCardAsync(cardCopy);
       this.updateData();
-    },
-    notify() {
-      console.log('Notified!');
     },
     updateData() {
       // refresh component data from vuex state

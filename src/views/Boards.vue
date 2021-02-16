@@ -60,7 +60,7 @@ export default {
   components: {
     BoardModal,
   },
-  created() {
+  async created() {
     if (store.state.isAuthenticated) {
       console.log('Loading Data...');
       this.$store.dispatch('loadDataAsync');
