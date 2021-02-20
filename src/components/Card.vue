@@ -1,5 +1,5 @@
 <template>
-  <div v-bind:id="card.url" draggable="true" @dragstart="drag($event)">
+  <div v-bind:id="card.url">
     <div v-if="card" @click="showModal = true">
       <div class="card-component">
         <div class="card-header">{{ card.name }}</div>

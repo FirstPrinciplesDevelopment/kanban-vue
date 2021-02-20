@@ -2,21 +2,26 @@
   <div v-if="container">
     <div class="container-component">
       <h2>{{ container.name }}</h2>
+      <p>{{ container.url }}</p>
       <button
         @click="deleteContainerAsync(container.url)"
         class="btn btn-danger"
       >
         Delete Container
       </button>
-      <div
-        v-for="card in cards"
-        v-bind:key="card.url"
-        v-bind:id="container.url"
-        @drop.prevent="drop($event)"
-        @dragover.prevent=""
+      <!--Cards-->
+      <draggable
+        :list="cards"
+        group="containers"
+        @start="dragging = true"
+        @end="dragging = false"
+        item-key="id"
+        @change="handleChange"
       >
-        <Card :cardProp="card" />
-      </div>
+        <template v-slot:item="{element}">
+            <Card :cardProp="element" />
+        </template>
+      </draggable>
     </div>
     <!--New Card-->
     <div class="col">
@@ -43,6 +48,7 @@
 import _ from 'lodash';
 import Card from '@/components/Card.vue';
 import { mapActions } from 'vuex';
+import draggable from 'vuedraggable';
 
 export default {
   name: 'Container',
@@ -66,28 +72,20 @@ export default {
       };
       this.updateData();
     },
-    async drop(ev) {
-      console.log('Dropped!!');
-      var cardUrl = ev.dataTransfer.getData('card');
-      console.log(cardUrl);
-      var card = this.$store.getters.getCardByUrl(cardUrl);
-      // deep copy the card, don't want to directly mutate state
-      var cardCopy = _.clone(card);
-      // change container field on the deep copy
-      cardCopy.container = this.containerProp.url;
-      await this.updateCardAsync(cardCopy);
-      this.updateData();
-    },
-    updateData() {
-      // refresh component data from vuex state
-      console.log('updateData');
-      this.container = this.$store.getters.getContainerByUrl(
-        this.containerProp.url
-      );
-      this.cards = this.$store.getters.getCardsByContainerUrl(
-        this.containerProp.url
-      );
-      console.log(this.cards);
+    async handleChange(ev) {
+      console.log('handle change!');
+      console.log(ev);
+      if (ev.added) {
+        console.log(ev.added);
+        var card = _.clone(ev.added.element);
+        card.container = this.containerProp.url;
+        console.log(card);
+        await this.updateCardAsync(card);
+      }
+      else if (ev.removed) {
+        console.log(ev.removed);
+        await this.updateCardAsync(ev.removed.element);
+      }
     },
     ...mapActions([
       'updateContainerAsync',
@@ -98,6 +96,7 @@ export default {
   },
   components: {
     Card,
+    draggable,
   },
 };
 </script>
