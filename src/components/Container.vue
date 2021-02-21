@@ -1,7 +1,11 @@
 <template>
   <div v-if="container">
     <div class="container-component">
-      <h2>{{ container.name }}</h2>
+      <input
+        type="text"
+        v-model="containerClone.name"
+        @change="updateContainer"
+      />
       <p>{{ container.url }}</p>
       <button
         @click="deleteContainerAsync(container.url)"
@@ -18,8 +22,8 @@
         item-key="id"
         @change="handleChange"
       >
-        <template v-slot:item="{element}">
-            <Card :cardProp="element" @delete="deleteCard" />
+        <template v-slot:item="{ element }">
+          <Card :cardProp="element" @delete="deleteCard" />
         </template>
       </draggable>
     </div>
@@ -60,7 +64,17 @@ export default {
       cards: this.$store.getters.getCardsByContainerUrl(this.containerProp.url),
     };
   },
+  computed: {
+    containerClone() {
+      return _.clone(this.container);
+    },
+  },
   methods: {
+    async updateContainer() {
+      console.log('updating conatiner');
+      await this.updateContainerAsync(this.containerClone);
+      this.UpdateData();
+    },
     async createCard() {
       console.log('creating Card');
       this.newCard['container'] = this.container.url;
