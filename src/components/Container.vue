@@ -19,7 +19,7 @@
         @change="handleChange"
       >
         <template v-slot:item="{element}">
-            <Card :cardProp="element" />
+            <Card :cardProp="element" @delete="deleteCard" />
         </template>
       </draggable>
     </div>
@@ -81,17 +81,31 @@ export default {
         card.container = this.containerProp.url;
         console.log(card);
         await this.updateCardAsync(card);
+        this.updateData();
       }
-      else if (ev.removed) {
-        console.log(ev.removed);
-        await this.updateCardAsync(ev.removed.element);
-      }
+    },
+    async deleteCard(cardUrl) {
+      console.log('deleting Card');
+      await this.deleteCardAsync(cardUrl);
+      this.updateData();
+    },
+    updateData() {
+      // refresh component data from vuex state
+      console.log('updateData');
+      this.container = this.$store.getters.getContainerByUrl(
+        this.containerProp.url
+      );
+      this.cards = this.$store.getters.getCardsByContainerUrl(
+        this.containerProp.url
+      );
+      console.log(this.cards);
     },
     ...mapActions([
       'updateContainerAsync',
       'deleteContainerAsync',
       'updateCardAsync',
       'createCardAsync',
+      'deleteCardAsync',
     ]),
   },
   components: {

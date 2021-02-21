@@ -6,7 +6,7 @@
         <div>position: {{ card.position }}</div>
         <div>{{ card.content }}</div>
         <button
-          @click.prevent="deleteCardAsync(card.url)"
+          @click.prevent.stop="$emit('delete', card.url)"
           class="btn btn-danger"
         >
           Delete
@@ -43,7 +43,7 @@ export default {
       ev.dataTransfer.setData('card', ev.target.id);
       console.log(ev.dataTransfer.types);
     },
-    ...mapActions(['updateCardAsync', 'deleteCardAsync']),
+    ...mapActions(['updateCardAsync']),
   },
   components: {
     CardModal,

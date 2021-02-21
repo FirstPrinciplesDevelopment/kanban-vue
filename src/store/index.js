@@ -311,97 +311,56 @@ export default createStore({
     },
     async authenticateAsync({ commit }, payload) {
       console.log('in authenticateAsync action');
-      const { data } = await axios.post(`${apiBase}/auth/`, payload);
-      commit('authenticate', data);
+      await axios.post(`${apiBase}/auth/`, payload).then(({ data }) => {
+        commit('authenticate', data);
+      });
     },
     async loadDataAsync({ commit }) {
       console.log('in loadDataAsync action');
-      const { data } = await axios.get(`${apiBase}/normalized/`, {
-        headers: {
-          Authorization: `Token ${this.state.authToken}`,
-        },
-      });
-      commit('loadData', data);
+      await axios
+        .get(`${apiBase}/normalized/`, {
+          headers: {
+            Authorization: `Token ${this.state.authToken}`,
+          },
+        })
+        .then(({ data }) => {
+          commit('loadData', data);
+        });
     },
     async loadBoardsAsync({ commit }) {
       console.log('in loadBoardsAsync action');
-      const { data } = await axios.get(`${this.state.apiBaseRoutes.boards}`, {
-        headers: {
-          Authorization: `Token ${this.state.authToken}`,
-        },
-      });
-      commit('loadBoards', data);
+      await axios
+        .get(`${this.state.apiBaseRoutes.boards}`, {
+          headers: {
+            Authorization: `Token ${this.state.authToken}`,
+          },
+        })
+        .then(({ data }) => {
+          commit('loadBoards', data);
+        });
     },
     async deleteBoardAsync({ commit }, url) {
       console.log('in deleteBoardAsync action');
-      await axios.delete(`${url}`, {
-        headers: {
-          Authorization: `Token ${this.state.authToken}`,
-        },
-      });
-      commit('deleteBoard', url);
+      await axios
+        .delete(`${url}`, {
+          headers: {
+            Authorization: `Token ${this.state.authToken}`,
+          },
+        })
+        .then(() => {
+          commit('deleteBoard', url);
+        });
     },
     async createBoardAsync({ commit }, payload) {
       console.log('in createBoardAsync action');
-      const { data } = await axios
+      await axios
         .post(`${this.state.apiBaseRoutes.boards}`, payload, {
           headers: {
             Authorization: `Token ${this.state.authToken}`,
           },
         })
-        .catch(function(error) {
-          if (error.response) {
-            // Request made and server responded
-            console.log(error.response.data);
-            console.log(error.response.status);
-            console.log(error.response.headers);
-          } else if (error.request) {
-            // The request was made but no response was received
-            console.log(error.request);
-          } else {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', error.message);
-          }
-        });
-      commit('createBoard', data);
-    },
-    async updateBoardAsync({ commit }, payload) {
-      console.log('in updateBoardAsync action');
-      const { data } = await axios.put(`${payload.url}`, payload, {
-        headers: {
-          Authorization: `Token ${this.state.authToken}`,
-        },
-      });
-      commit('updateBoard', data);
-    },
-    async loadContainersAsync({ commit }) {
-      console.log('in loadContainersAsync action');
-      const { data } = await axios.get(
-        `${this.state.apiBaseRoutes.containers}`,
-        {
-          headers: {
-            Authorization: `Token ${this.state.authToken}`,
-          },
-        }
-      );
-      commit('loadContainers', data);
-    },
-    async deleteContainerAsync({ commit }, url) {
-      console.log('in deleteContainerAsync action');
-      await axios.delete(`${url}`, {
-        headers: {
-          Authorization: `Token ${this.state.authToken}`,
-        },
-      });
-      commit('deleteContainer', url);
-    },
-    async createContainerAsync({ commit }, payload) {
-      console.log('in createContainerAsync action');
-      const { data } = await axios
-        .post(`${this.state.apiBaseRoutes.containers}`, payload, {
-          headers: {
-            Authorization: `Token ${this.state.authToken}`,
-          },
+        .then(({ data }) => {
+          commit('createBoard', data);
         })
         .catch(function(error) {
           if (error.response) {
@@ -417,34 +376,104 @@ export default createStore({
             console.log('Error', error.message);
           }
         });
-      commit('createContainer', data);
+    },
+    async updateBoardAsync({ commit }, payload) {
+      console.log('in updateBoardAsync action');
+      await axios
+        .put(`${payload.url}`, payload, {
+          headers: {
+            Authorization: `Token ${this.state.authToken}`,
+          },
+        })
+        .then(({ data }) => {
+          commit('updateBoard', data);
+        });
+    },
+    async loadContainersAsync({ commit }) {
+      console.log('in loadContainersAsync action');
+      await axios
+        .get(`${this.state.apiBaseRoutes.containers}`, {
+          headers: {
+            Authorization: `Token ${this.state.authToken}`,
+          },
+        })
+        .then(({ data }) => {
+          commit('loadContainers', data);
+        });
+    },
+    async deleteContainerAsync({ commit }, url) {
+      console.log('in deleteContainerAsync action');
+      await axios
+        .delete(`${url}`, {
+          headers: {
+            Authorization: `Token ${this.state.authToken}`,
+          },
+        })
+        .then(() => {
+          commit('deleteContainer', url);
+        });
+    },
+    async createContainerAsync({ commit }, payload) {
+      console.log('in createContainerAsync action');
+      await axios
+        .post(`${this.state.apiBaseRoutes.containers}`, payload, {
+          headers: {
+            Authorization: `Token ${this.state.authToken}`,
+          },
+        })
+        .then(({ data }) => {
+          commit('createContainer', data);
+        })
+        .catch(function(error) {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
+        });
     },
     async updateContainerAsync({ commit }, payload) {
       console.log('in updateContainerAsync action');
-      const { data } = await axios.put(`${payload.url}`, payload, {
-        headers: {
-          Authorization: `Token ${this.state.authToken}`,
-        },
-      });
-      commit('updateContainer', data);
+      await axios
+        .put(`${payload.url}`, payload, {
+          headers: {
+            Authorization: `Token ${this.state.authToken}`,
+          },
+        })
+        .then(({ data }) => {
+          commit('updateContainer', data);
+        });
     },
     async loadCardsAsync({ commit }) {
       console.log('in loadCardsAsync action');
-      const { data } = await axios.get(`${this.state.apiBaseRoutes.cards}`, {
-        headers: {
-          Authorization: `Token ${this.state.authToken}`,
-        },
-      });
-      commit('loadCards', data);
+      await axios
+        .get(`${this.state.apiBaseRoutes.cards}`, {
+          headers: {
+            Authorization: `Token ${this.state.authToken}`,
+          },
+        })
+        .then(({ data }) => {
+          commit('loadCards', data);
+        });
     },
     async deleteCardAsync({ commit }, url) {
       console.log('in deleteCardAsync action');
-      await axios.delete(`${url}`, {
-        headers: {
-          Authorization: `Token ${this.state.authToken}`,
-        },
-      });
-      commit('deleteCard', url);
+      await axios
+        .delete(`${url}`, {
+          headers: {
+            Authorization: `Token ${this.state.authToken}`,
+          },
+        })
+        .then(() => {
+          commit('deleteCard', url);
+        });
     },
     async createCardAsync({ commit }, payload) {
       console.log('in createCardAsync action');
