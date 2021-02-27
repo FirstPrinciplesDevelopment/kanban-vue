@@ -1,10 +1,18 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link> |
-    <router-link to="/boards">Boards</router-link>
+  <div v-if="authenticated" id="nav" class="flex flex-row bg-gray-200">
+    <div class="text-2xl px-8 py-4 my-1">
+          <router-link to="/">Home</router-link>
+    </div>
+    <div class="text-2xl px-8 py-4 my-1">
+      <router-link to="/about">About</router-link>
+    </div>
+    <div class="text-2xl px-8 py-4 my-1">
+      <router-link to="/boards">Boards</router-link>
+    </div>
   </div>
-  <router-view/>
+  <div class="">
+    <router-view/>
+  </div>
 </template>
 
 <script>
@@ -12,6 +20,11 @@ import store from '@/store';
 
 export default {
   name: 'App',
+  computed: {
+    authenticated() {
+      return store.state.isAuthenticated;
+    },
+  },
   async created() {
     await this.$store.dispatch('getApiRoutesAsync');
     if (store.state.isAuthenticated)
@@ -24,36 +37,3 @@ export default {
 };
 </script>
 
-<style>
-/* global style */
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  margin-top: 60px;
-  color: #10cc39;
-}
-
-body {
-  color: #10cc39;
-  background-color: #0d1117;
-}
-
-a {
-  color:#00bfff;
-}
-
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #45878a;
-}
-
-#nav a.router-link-exact-active {
-  color: #10cc39;
-}
-</style>

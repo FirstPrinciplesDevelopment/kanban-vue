@@ -1,13 +1,15 @@
 <template>
-  <div v-bind:id="card.url">
+  <div
+    v-bind:id="card.url"
+    class="p-2 m-2 max-w-sm mx-auto bg-white rounded-xl shadow-md items-center space-x-4 bg-blue-50 border border-blue-300"
+  >
     <div v-if="card" @click="showModal = true">
-      <div class="card-component">
-        <div class="card-header">{{ card.name }}</div>
-        <div>position: {{ card.position }}</div>
+      <div class="">
+        <div class="text-xl font-semibold pb-2">{{ card.name }}</div>
         <div>{{ card.content }}</div>
         <button
           @click.prevent.stop="$emit('delete', card.url)"
-          class="btn btn-danger"
+          class="px-4 py-1 text-sm text-red-600 font-semibold rounded-full border border-red-600 hover:text-white hover:bg-red-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
         >
           Delete
         </button>
@@ -50,18 +52,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.card-component {
-  padding: 1em;
-  margin: 1em;
-  border-radius: 7px;
-  color: #c0d4ee;
-  background-color: #5b7bcc;
-  box-shadow: 5px 7px 5px #000;
-}
-.card-header {
-  font-weight: 700;
-  font-size: 20px;
-}
-</style>
