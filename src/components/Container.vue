@@ -89,13 +89,28 @@ export default {
     async handleChange(ev) {
       console.log('handle change!');
       console.log(ev);
+      var card;
       if (ev.added) {
         console.log(ev.added);
-        var card = _.clone(ev.added.element);
+        card = _.clone(ev.added.element);
+        // set current container on the moved card
         card.container = this.containerProp.url;
+        // set current position on the moved card
+        card.position = ev.added.newIndex + 1;
         console.log(card);
         await this.updateCardAsync(card);
         this.updateData();
+      }
+      else if (ev.removed) {
+        console.log(ev.removed);
+      }
+      else if (ev.moved) {
+        console.log(ev.moved);
+        card = _.clone(ev.moved.element);
+        // set current position on the moved card, negotiate 0 vs. 1 based index
+        card.position = ev.moved.newIndex + 1;
+        console.log(card);
+        await this.updateCardAsync(card);
       }
     },
     async deleteCard(cardUrl) {

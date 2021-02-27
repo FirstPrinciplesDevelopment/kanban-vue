@@ -118,7 +118,9 @@ export default createStore({
           result.push(state.containers[url]);
         }
       }
-      return result;
+      return result.sort((a, b) => {
+        return a.position - b.position;
+      });
     },
     getContainerByUrl: (state) => (url) => {
       return state.containers[url];
@@ -130,7 +132,9 @@ export default createStore({
           result.push(state.cards[url]);
         }
       }
-      return result;
+      return result.sort((a, b) => {
+        return a.position - b.position;
+      });
     },
     getCardByUrl: (state) => (url) => {
       return state.cards[url];
