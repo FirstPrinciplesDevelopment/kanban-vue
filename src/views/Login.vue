@@ -95,7 +95,7 @@ export default {
         password: this.password,
       });
       console.log('Done Authenticating');
-      this.$router.push({ name: 'Home' });
+      this.$router.push({ name: 'Boards' });
     },
   },
 };

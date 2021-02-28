@@ -1,16 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Home from '../views/Home.vue';
 import Boards from '../views/Boards.vue';
 import Board from '../views/Board.vue';
 import Login from '../views/Login.vue';
 import store from '../store/index.js';
 
 const routes = [
-  {
-    path: '/',
-    name: 'Home',
-    component: Home,
-  },
   {
     path: '/about',
     name: 'About',
@@ -47,6 +41,8 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   if (to.name !== 'Login' && !store.state.isAuthenticated) {
     next({ name: 'Login' });
+  } else if (to.path === '/' || to.path === '') {
+    next({ name: 'Boards' });
   } else {
     next();
   }
