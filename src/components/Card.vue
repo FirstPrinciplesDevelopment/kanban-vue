@@ -5,7 +5,7 @@
   >
     <div v-if="card" @click="showModal = true">
       <div class="">
-        <div class="text-xl text-black font-semibold pb-2">{{ card.name }}</div>
+        <div class="text-lg text-black font-semibold pb-2">{{ card.name }}</div>
         <div v-if="card.content" class="text-sm text-gray-400 pb-1">{{ card.content.substring(0, 40) }}...</div>
         <button
           @click.prevent.stop="$emit('delete', card.url)"

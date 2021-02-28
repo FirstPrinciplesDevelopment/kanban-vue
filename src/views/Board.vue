@@ -1,7 +1,7 @@
 <template>
   <div class="m-2">
     <div v-if="board">
-      <h2 class="text-4xl font-semibold text-black">{{ board.name }}</h2>
+      <h2 class="text-4xl pb-2 font-semibold text-black">{{ board.name }}</h2>
       <div class="grid grid-flow-col auto-cols-max overflow-x-auto">
         <!--Container List-->
         <div
