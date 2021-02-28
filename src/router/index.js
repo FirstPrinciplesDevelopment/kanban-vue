@@ -6,6 +6,10 @@ import store from '../store/index.js';
 
 const routes = [
   {
+    path: '/',
+    redirect: '/boards',
+  },
+  {
     path: '/about',
     name: 'About',
     // route level code-splitting
@@ -41,8 +45,6 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   if (to.name !== 'Login' && !store.state.isAuthenticated) {
     next({ name: 'Login' });
-  } else if (to.path === '/' || to.path === '') {
-    next({ name: 'Boards' });
   } else {
     next();
   }
