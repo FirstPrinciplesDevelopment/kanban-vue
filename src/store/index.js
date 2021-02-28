@@ -146,16 +146,11 @@ export default createStore({
       console.log('setRoutes mutation');
       state.apiBaseRoutes = data;
     },
-    authenticate(state, data) {
+    authenticate(state, token) {
       console.log('authenticate mutation');
-      console.log(data);
-      if (data['token']) {
-        state.authToken = data['token'];
-        state.isAuthenticated = true;
-        console.log('auth succeeded');
-      } else {
-        console.log('auth failed');
-      }
+      console.log(token);
+      state.authToken = token;
+      state.isAuthenticated = true;
     },
     loadData(state, data) {
       console.log('loadData mutation');
@@ -318,7 +313,12 @@ export default createStore({
     async authenticateAsync({ commit }, payload) {
       console.log('in authenticateAsync action');
       await axios.post(`${apiBase}/auth/`, payload).then(({ data }) => {
-        commit('authenticate', data);
+        if (data['token']) {
+          // write token to localStorage
+          localStorage.setItem('kanbanAccessToken', data['token']);
+          // write token to Vuex store state
+          commit('authenticate', data['token']);
+        }
       });
     },
     async loadDataAsync({ commit }) {

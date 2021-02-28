@@ -8,7 +8,7 @@
     </div>
   </div>
   <div class="">
-    <router-view/>
+    <router-view />
   </div>
 </template>
 
@@ -23,14 +23,17 @@ export default {
     },
   },
   async created() {
+    // if there is token already in local storage, authenticate with it
+    this.$store.commit(
+      'authenticate',
+      localStorage.getItem('kanbanAccessToken')
+    );
     await this.$store.dispatch('getApiRoutesAsync');
-    if (store.state.isAuthenticated)
-    {
+    if (store.state.isAuthenticated) {
       console.log('Loading Data...');
       this.$store.dispatch('loadDataAsync');
       console.log('Done loading data');
     }
-  }
+  },
 };
 </script>
-
