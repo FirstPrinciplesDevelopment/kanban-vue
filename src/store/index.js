@@ -219,6 +219,8 @@ export default createStore({
       // add a board to state like boards[board_url] : {board_object}
       state.boards[data.url] = data;
       state.boardList.push(data.url);
+      // update boardSlugMap
+      state.boardSlugMap[data.slug] = data.url;
     },
     deleteBoard(state, url) {
       console.log('deleteBoard mutation');
