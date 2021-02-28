@@ -1,12 +1,12 @@
 <template>
   <div v-if="authenticated" id="nav" class="flex flex-row bg-gray-200">
-    <div class="text-2xl px-8 py-4 my-1">
+    <div class="text-2xl px-8 py-4 my-1 text-black">
           <router-link to="/">Home</router-link>
     </div>
-    <div class="text-2xl px-8 py-4 my-1">
+    <div class="text-2xl px-8 py-4 my-1 text-black">
       <router-link to="/about">About</router-link>
     </div>
-    <div class="text-2xl px-8 py-4 my-1">
+    <div class="text-2xl px-8 py-4 my-1 text-black">
       <router-link to="/boards">Boards</router-link>
     </div>
   </div>

@@ -8,13 +8,13 @@
               <tr>
                 <th
                   scope="col"
-                  class="px-6 py-3 text-left text-xl font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-gray-700 text-left text-xl font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Name
                 </th>
                 <th
                   scope="col"
-                  class="px-6 py-3 text-left text-xl font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-gray-700 text-left text-xl font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Archived
                 </th>
@@ -28,7 +28,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="board in boards" v-bind:key="board.url">
-                <td class="px-6 py-4 whitespace-nowrap text-2xl">
+                <td class="px-6 py-4 text-black whitespace-nowrap text-2xl">
                   <router-link :to="'/board/' + board.slug">
                     {{ board.name }}
                   </router-link>

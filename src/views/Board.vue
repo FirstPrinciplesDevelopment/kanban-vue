@@ -1,13 +1,13 @@
 <template>
   <div class="m-2">
     <div v-if="board">
-      <h2 class="text-4xl font-semibold">{{ board.name }}</h2>
-      <div class="flex flex-row">
+      <h2 class="text-4xl font-semibold text-black">{{ board.name }}</h2>
+      <div class="grid grid-flow-col auto-cols-max overflow-x-auto">
         <!--Container List-->
         <div
           v-for="container in containers"
           v-bind:key="container.url"
-          class="pt-2 px-4"
+          class="p-2 w-full"
         >
           <Container :containerProp="container" />
         </div>
