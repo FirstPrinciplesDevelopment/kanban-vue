@@ -1,7 +1,7 @@
 <template>
   <div
     v-bind:id="card.url"
-    class="p-2 m-2 max-w-sm mx-auto bg-white rounded-xl shadow-md items-center space-x-4 bg-blue-50 border border-blue-300"
+    class="p-2 m-2 max-w-sm mx-auto rounded-xl shadow-md items-center space-x-4 bg-blue-50 border border-blue-300"
   >
     <div v-if="card" @click="showModal = true">
       <div class="">
