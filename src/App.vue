@@ -24,10 +24,13 @@ export default {
   },
   async created() {
     // if there is token already in local storage, authenticate with it
-    this.$store.commit(
-      'authenticate',
-      localStorage.getItem('kanbanAccessToken')
-    );
+    if (localStorage.getItem('kanbanAccessToken')) {
+      this.$store.commit(
+        'authenticate',
+        localStorage.getItem('kanbanAccessToken')
+      );
+    }
+    // get Api routes
     await this.$store.dispatch('getApiRoutesAsync');
     if (store.state.isAuthenticated) {
       console.log('Loading Data...');
