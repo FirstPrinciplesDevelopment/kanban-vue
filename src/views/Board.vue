@@ -1,13 +1,13 @@
 <template>
-  <div class="board">
+  <div class="m-2">
     <div v-if="board">
-      <h2>{{ board.name }}</h2>
-      <div class="row">
+      <h2 class="text-4xl pb-2 font-semibold text-black">{{ board.name }}</h2>
+      <div class="grid grid-flow-col auto-cols-max overflow-x-auto">
         <!--Container List-->
         <div
           v-for="container in containers"
           v-bind:key="container.url"
-          class="col"
+          class="p-2 w-full"
         >
           <Container :containerProp="container" />
         </div>
@@ -18,9 +18,12 @@
               type="text"
               v-model="newContainer.name"
               placeholder="New Container"
+              class="appearance-none rounded-l-md px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-300 focus:border-green-300 focus:z-10 md:text-md"
             />
-            <button class="btn btn-success" v-on:click="createContainer">
-              Create
+            <button 
+            class="justify-center rounded-r-md py-2 px-2 border border-transparent text-md text-white bg-green-500 hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-300"
+              v-on:click="createContainer">
+              Add Container
             </button>
           </div>
         </div>
@@ -64,25 +67,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.row {
-  overflow-x: scroll;
-  white-space: nowrap;
-  overflow-wrap: unset;
-}
-.col {
-  width: 350px;
-  display: inline-block;
-  vertical-align: top;
-}
-.container-create {
-  padding: 1em;
-  margin: 1em;
-  border-radius: 7px;
-  color: #3389fa;
-  background-color: #0d1117;
-  border: 1px solid;
-  border-color: #fff;
-}
-</style>

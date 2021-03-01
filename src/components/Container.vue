@@ -1,49 +1,58 @@
 <template>
-  <div v-if="container">
-    <div class="container-component">
-      <input
-        type="text"
-        v-model="containerClone.name"
-        @change="updateContainer"
-      />
-      <p>{{ container.url }}</p>
-      <button
-        @click="deleteContainerAsync(container.url)"
-        class="btn btn-danger"
-      >
-        Delete Container
-      </button>
-      <!--Cards-->
-      <draggable
-        :list="cards"
-        group="containers"
-        @start="dragging = true"
-        @end="dragging = false"
-        item-key="id"
-        @change="handleChange"
-      >
-        <template v-slot:item="{ element }">
-          <Card :cardProp="element" @delete="deleteCard" />
-        </template>
-      </draggable>
-    </div>
-    <!--New Card-->
-    <div class="col">
-      <div class="card-create">
-        <input type="text" v-model="newCard.name" placeholder="New Card" />
-        <button class="btn btn-success" @click="createCard">
-          Add Card
+  <div v-if="container" class="overflow-y-auto h-auto">
+    <div class="border border-gray-300 bg-gray-100 rounded-md shadow-xl">
+      <div class="bg-gray-300 p-2">
+        <label
+          class="w-1/6 justify-center rounded-l-md py-2 px-2 border border-transparent text-md text-white bg-gray-600 hover:bg-gray-700"
+        >
+          Title
+        </label>
+        <input
+          type="text"
+          class="w-5/6 appearance-none rounded-r-md px-3 py-2 border border-gray-300 text-gray-900 focus:outline-none focus:ring-gray-500 focus:border-gray-500 focus:z-10 md:text-md font-bold"
+          v-model="containerClone.name"
+          @change="updateContainer"
+        />
+        <button
+          @click="deleteContainerAsync(container.url)"
+          class="px-4 py-1 my-2 text-sm text-red-600 font-semibold rounded-full border border-red-600 hover:text-white hover:bg-red-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
+        >
+          Delete
         </button>
       </div>
+      <div class="p-2">
+        <!--Cards-->
+        <draggable
+          :list="cards"
+          group="containers"
+          @start="dragging = true"
+          @end="dragging = false"
+          item-key="id"
+          @change="handleChange"
+        >
+          <template v-slot:item="{ element }">
+            <Card :cardProp="element" @delete="deleteCard" />
+          </template>
+        </draggable>
+        <!--New Card-->
+        <div class="py-4">
+          <div class="card-create">
+            <input
+              type="text"
+              class="w-3/4 appearance-none rounded-l-md px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-300 focus:border-green-300 focus:z-10 md:text-md"
+              v-model="newCard.name"
+              placeholder="New Card"
+            />
+            <button
+              class="w-1/4 justify-center rounded-r-md py-2 px-2 border border-transparent text-md text-white bg-green-500 hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-300"
+              @click="createCard"
+            >
+              Add Card
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    <!-- TODO: remove: For Debugging/Testing only -->
-    <pre>{{
-      JSON.stringify(
-        cards.map((x) => x.url),
-        undefined,
-        4
-      )
-    }}</pre>
   </div>
   <div v-else>Loading...</div>
 </template>
@@ -100,11 +109,9 @@ export default {
         console.log(card);
         await this.updateCardAsync(card);
         this.updateData();
-      }
-      else if (ev.removed) {
+      } else if (ev.removed) {
         console.log(ev.removed);
-      }
-      else if (ev.moved) {
+      } else if (ev.moved) {
         console.log(ev.moved);
         card = _.clone(ev.moved.element);
         // set current position on the moved card, negotiate 0 vs. 1 based index
@@ -143,24 +150,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.container-component {
-  padding: 1em;
-  margin: 1em;
-  border-radius: 7px;
-  color: #3389fa;
-  background-color: #0d1117;
-  border: 1px solid;
-  border-color: #fff;
-}
-
-pre {
-  font-size: 10px;
-  background-color: rgb(27, 27, 27);
-  margin: 30px;
-  padding: 10px;
-  width: 400px;
-  min-height: 100px;
-}
-</style>

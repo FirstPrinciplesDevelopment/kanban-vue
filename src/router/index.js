@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Home from '../views/Home.vue';
 import Boards from '../views/Boards.vue';
 import Board from '../views/Board.vue';
 import Login from '../views/Login.vue';
@@ -8,8 +7,7 @@ import store from '../store/index.js';
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: Home,
+    redirect: '/boards',
   },
   {
     path: '/about',

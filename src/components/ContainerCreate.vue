@@ -26,15 +26,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.container-component {
-  padding: 1em;
-  margin: 1em;
-  border-radius: 7px;
-  color: #3389fa;
-  background-color: #0d1117;
-  border: 1px solid;
-  border-color: #fff;
-}
-</style>
