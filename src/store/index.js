@@ -9,8 +9,10 @@ export default createStore({
   // enable strict mode for development only (impacts performance)
   strict: true,
   state: {
-    authToken: '',
+    accessToken: '',
+    refreshToken: '',
     isAuthenticated: false,
+    messageQueue: [],
     apiBaseRoutes: {
       attachments: '',
       boards: '',
@@ -146,11 +148,39 @@ export default createStore({
       console.log('setRoutes mutation');
       state.apiBaseRoutes = data;
     },
-    authenticate(state, token) {
+    pushMessage(state, message) {
+      console.log('pushMessage mutation');
+      state.messageQueue.push(message);
+    },
+    popMessage(state) {
+      console.log('popMessage mutation');
+      state.messageQueue.pop();
+    },
+    clearMessages(state) {
+      console.log('clearMessages mutation');
+      state.messageQueue = [];
+    },
+    logout(state) {
+      console.log('logout mutation');
+      // remove tokens from localStorage
+      localStorage.removeItem('kanbanAccessToken');
+      localStorage.removeItem('kanbanRefreshToken');
+      // remove tokens from vuex state, set isAuthenticated = false
+      state.accessToken = '';
+      state.refreshToken = '';
+      state.isAuthenticated = false;
+    },
+    authenticate(state, data) {
       console.log('authenticate mutation');
-      console.log(token);
-      state.authToken = token;
+      console.log(data);
+      state.accessToken = data['access'];
+      state.refreshToken = data['refresh'];
       state.isAuthenticated = true;
+    },
+    refresh(state, accessToken) {
+      console.log('refresh mutation');
+      console.log(accessToken);
+      state.accessToken = accessToken;
     },
     loadData(state, data) {
       console.log('loadData mutation');
@@ -312,25 +342,79 @@ export default createStore({
     },
     async authenticateAsync({ commit }, payload) {
       console.log('in authenticateAsync action');
-      await axios.post(`${apiBase}/auth/`, payload).then(({ data }) => {
-        if (data['token']) {
-          // write token to localStorage
-          localStorage.setItem('kanbanAccessToken', data['token']);
-          // write token to Vuex store state
-          commit('authenticate', data['token']);
-        }
-      });
+      await axios
+        .post(`${apiBase}/token/`, payload)
+        .then(({ data }) => {
+          if (data['access'] && data['refresh']) {
+            // write tokens to localStorage
+            localStorage.setItem('kanbanAccessToken', data['access']);
+            localStorage.setItem('kanbanRefreshToken', data['refresh']);
+            // write tokens to Vuex store state
+            commit('authenticate', data);
+          }
+        })
+        .catch(({ error }) => {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            this.refreshAsync().then(() => {
+              // try again
+              this.authenticateAsync(payload);
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
+        });
+    },
+    async refreshAsync({ commit }) {
+      console.log('in refreshAsync action');
+      await axios
+        .post(`${apiBase}/token/refresh/`, { refresh: this.state.refreshToken })
+        .then(({ data }) => {
+          if (data['access']) {
+            commit('refresh', data['access']);
+          } else {
+            commit('logout');
+          }
+        });
     },
     async loadDataAsync({ commit }) {
       console.log('in loadDataAsync action');
       await axios
         .get(`${apiBase}/normalized/`, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
+          // remove tokens from localStorage
           commit('loadData', data);
+        })
+        .catch(({ error }) => {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            this.refreshAsync().then(() => {
+              // try again
+              this.loadDataAsync();
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
     async loadBoardsAsync({ commit }) {
@@ -338,11 +422,30 @@ export default createStore({
       await axios
         .get(`${this.state.apiBaseRoutes.boards}`, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
           commit('loadBoards', data);
+        })
+        .catch(({ error }) => {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            this.refreshAsync().then(() => {
+              // try again
+              this.loadBoardsAsync();
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
     async deleteBoardAsync({ commit }, url) {
@@ -350,11 +453,30 @@ export default createStore({
       await axios
         .delete(`${url}`, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(() => {
           commit('deleteBoard', url);
+        })
+        .catch(({ error }) => {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            this.refreshAsync().then(() => {
+              // try again
+              this.deleteBoardAsync(url);
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
     async createBoardAsync({ commit }, payload) {
@@ -362,18 +484,23 @@ export default createStore({
       await axios
         .post(`${this.state.apiBaseRoutes.boards}`, payload, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
           commit('createBoard', data);
         })
-        .catch(function(error) {
+        .catch(({ error }) => {
           if (error.response) {
             // Request made and server responded
             console.log(error.response.data);
             console.log(error.response.status);
             console.log(error.response.headers);
+            // try to get a new access token
+            this.refreshAsync().then(() => {
+              // try again
+              this.createBoardAsync(payload);
+            });
           } else if (error.request) {
             // The request was made but no response was received
             console.log(error.request);
@@ -388,11 +515,30 @@ export default createStore({
       await axios
         .put(`${payload.url}`, payload, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
           commit('updateBoard', data);
+        })
+        .catch(({ error }) => {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            this.refreshAsync().then(() => {
+              // try again
+              this.updateBoardAsync(payload);
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
     async loadContainersAsync({ commit }) {
@@ -400,11 +546,30 @@ export default createStore({
       await axios
         .get(`${this.state.apiBaseRoutes.containers}`, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Token ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
           commit('loadContainers', data);
+        })
+        .catch(({ error }) => {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            this.refreshAsync().then(() => {
+              // try again
+              this.loadContainersAsync();
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
     async deleteContainerAsync({ commit }, url) {
@@ -412,11 +577,30 @@ export default createStore({
       await axios
         .delete(`${url}`, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(() => {
           commit('deleteContainer', url);
+        })
+        .catch(({ error }) => {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            this.refreshAsync().then(() => {
+              // try again
+              this.deleteContainerAsync(url);
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
     async createContainerAsync({ commit }, payload) {
@@ -424,7 +608,7 @@ export default createStore({
       await axios
         .post(`${this.state.apiBaseRoutes.containers}`, payload, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
@@ -436,6 +620,11 @@ export default createStore({
             console.log(error.response.data);
             console.log(error.response.status);
             console.log(error.response.headers);
+            // try to get a new access token
+            this.refreshAsync().then(() => {
+              // try again
+              this.createContainerAsync(payload);
+            });
           } else if (error.request) {
             // The request was made but no response was received
             console.log(error.request);
@@ -450,11 +639,30 @@ export default createStore({
       await axios
         .put(`${payload.url}`, payload, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
           commit('updateContainer', data);
+        })
+        .catch(function(error) {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            this.refreshAsync().then(() => {
+              // try again
+              this.updateContainerAsync(payload);
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
     async loadCardsAsync({ commit }) {
@@ -462,11 +670,30 @@ export default createStore({
       await axios
         .get(`${this.state.apiBaseRoutes.cards}`, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
           commit('loadCards', data);
+        })
+        .catch(function(error) {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            this.refreshAsync().then(() => {
+              // try again
+              this.loadCardsAsync();
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
     async deleteCardAsync({ commit }, url) {
@@ -474,11 +701,30 @@ export default createStore({
       await axios
         .delete(`${url}`, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(() => {
           commit('deleteCard', url);
+        })
+        .catch(function(error) {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            this.refreshAsync().then(() => {
+              // try again
+              this.deleteCardAsync(url);
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
     async createCardAsync({ commit }, payload) {
@@ -486,7 +732,7 @@ export default createStore({
       await axios
         .post(`${this.state.apiBaseRoutes.cards}`, payload, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
@@ -499,6 +745,11 @@ export default createStore({
             console.log(error.response.data);
             console.log(error.response.status);
             console.log(error.response.headers);
+            // try to get a new access token
+            this.refreshAsync().then(() => {
+              // try again
+              this.createCardAsync(payload);
+            });
           } else if (error.request) {
             // The request was made but no response was received
             console.log(error.request);
@@ -513,11 +764,31 @@ export default createStore({
       await axios
         .put(`${payload.url}`, payload, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
           commit('updateCard', data);
+        })
+        .catch(function(error) {
+          // TODO: decompose
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            this.refreshAsync().then(() => {
+              // try again
+              this.updateCardAsync(payload);
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
   },
