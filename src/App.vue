@@ -23,13 +23,16 @@
     </div>
   </div>
 
-  <div class="">
+  <MessageBanner />
+
+  <div class="main-view">
     <router-view />
   </div>
 </template>
 
 <script>
 import store from '@/store';
+import MessageBanner from './components/MessageBanner.vue';
 
 export default {
   name: 'App',
@@ -63,5 +66,8 @@ export default {
       console.log('Done loading data');
     }
   },
+  components: {
+    MessageBanner,
+  }
 };
 </script>

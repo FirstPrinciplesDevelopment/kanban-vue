@@ -1,6 +1,6 @@
 import { createStore } from 'vuex';
 import axios from 'axios';
-import router from '../router/index.js'
+import router from '../router/index.js';
 
 // define VUE_APP_API_BASE in .env under project root like
 // VUE_APP_API_BASE=http://example.com:8000
@@ -142,6 +142,9 @@ export default createStore({
     getCardByUrl: (state) => (url) => {
       return state.cards[url];
     },
+    getMessages: (state) => {
+      return state.messageQueue;
+    },
   },
   mutations: {
     // mutations change vuex state, they DO NOT call APIs
@@ -155,11 +158,20 @@ export default createStore({
     },
     popMessage(state) {
       console.log('popMessage mutation');
-      state.messageQueue.pop();
+      return state.messageQueue.pop();
     },
     clearMessages(state) {
       console.log('clearMessages mutation');
       state.messageQueue = [];
+    },
+    removeMessage(state, message) {
+      console.log('removeMessage mutation');
+      // get index of that message
+      var index = state.messageQueue.indexOf(message);
+      // if that message exists, remove it
+      if (index !== -1) {
+        state.messageQueue.splice(index, 1);
+      }
     },
     logout(state) {
       console.log('logout mutation');
@@ -387,6 +399,7 @@ export default createStore({
             localStorage.setItem('kanbanRefreshToken', data['refresh']);
             // write tokens to Vuex store state
             commit('authenticate', data);
+            commit('pushMessage', `Welcome, ${payload['username']}!`);
           }
         })
         .catch((error) => {
