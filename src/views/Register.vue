@@ -53,6 +53,17 @@
             Register
           </button>
         </div>
+        <div class="flex justify-center">
+          <div class="text-sm">
+            <a
+              href="#"
+              v-on:click="goToLogin"
+              class="object-center font-medium text-indigo-800 hover:text-indigo-500"
+            >
+              Already registered? Login here.
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -71,6 +82,9 @@ export default {
         username: this.userName,
         password: this.password,
       });
+    },
+    goToLogin() {
+      this.$router.push({ name: 'Login' });
     },
   },
 };

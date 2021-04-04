@@ -44,7 +44,8 @@
           </div>
         </div>
 
-        <div class="flex items-center justify-between">
+        <!-- Remember Me/Forgot Password controls -->
+        <!-- <div class="flex items-center justify-between">
           <div class="flex items-center">
             <input
               id="remember_me"
@@ -65,7 +66,7 @@
               Forgot your password?
             </a>
           </div>
-        </div>
+        </div> -->
 
         <div>
           <button
@@ -82,9 +83,9 @@
             <a
               href="#"
               v-on:click="register"
-              class="object-center font-medium text-indigo-600 hover:text-indigo-500"
+              class="object-center font-medium text-indigo-800 hover:text-indigo-500"
             >
-              Register as a new user
+              Don't have an account? Register here.
             </a>
           </div>
         </div>
