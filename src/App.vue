@@ -1,5 +1,9 @@
 <template>
-  <div id="nav" v-if="authenticated" class="flex items-center justify-between bg-gray-200">
+  <div
+    id="nav"
+    v-if="authenticated"
+    class="flex items-center justify-between bg-gray-200"
+  >
     <div id="nav-links" class="flex flex-row">
       <div class="text-2xl px-8 py-4 my-1 text-black">
         <router-link to="/about">About</router-link>

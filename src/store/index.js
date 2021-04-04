@@ -1,5 +1,6 @@
 import { createStore } from 'vuex';
 import axios from 'axios';
+import router from '../router/index.js'
 
 // define VUE_APP_API_BASE in .env under project root like
 // VUE_APP_API_BASE=http://example.com:8000
@@ -343,8 +344,39 @@ export default createStore({
         commit('setRoutes', data);
       });
     },
+    // REGISTER A NEW USER
+    async registerAsync({ commit }, payload) {
+      console.log('in registerAsync action');
+      return await axios
+        .post(`${apiBase}/register/`, payload)
+        .then(({ data }) => {
+          if (data['success']) {
+            commit('pushMessage', `Registered new user ${data['username']}`);
+            // navigate to boards (which will be redirected to Login)
+            router.push({ name: 'Boards' });
+          }
+        })
+        .catch((error) => {
+          if (error.response) {
+            commit(
+              'pushMessage',
+              `Failed to create new user ${payload['username']}: ${error.response.data['error']}`
+            );
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
+        });
+    },
     // AUTHENTICATE USER - TRADE U/P FOR TOKEN
-    async authenticateAsync({ commit, dispatch }, payload) {
+    async authenticateAsync({ commit }, payload) {
       console.log('in authenticateAsync action');
       await axios
         .post(`${apiBase}/token/`, payload)
@@ -357,17 +389,12 @@ export default createStore({
             commit('authenticate', data);
           }
         })
-        .catch(({ error }) => {
+        .catch((error) => {
           if (error.response) {
             // Request made and server responded
             console.log(error.response.data);
             console.log(error.response.status);
             console.log(error.response.headers);
-            // try to get a new access token
-            dispatch('refreshAsync').then(() => {
-              // try again
-              dispatch('authenticateAsync', payload);
-            });
           } else if (error.request) {
             // The request was made but no response was received
             console.log(error.request);
@@ -442,7 +469,7 @@ export default createStore({
         .then(({ data }) => {
           commit('loadBoards', data);
         })
-        .catch(({ error }) => {
+        .catch((error) => {
           if (error.response) {
             // Request made and server responded
             console.log(error.response.data);
@@ -474,7 +501,7 @@ export default createStore({
         .then(() => {
           commit('deleteBoard', url);
         })
-        .catch(({ error }) => {
+        .catch((error) => {
           if (error.response) {
             // Request made and server responded
             console.log(error.response.data);
@@ -506,7 +533,7 @@ export default createStore({
         .then(({ data }) => {
           commit('createBoard', data);
         })
-        .catch(({ error }) => {
+        .catch((error) => {
           if (error.response) {
             // Request made and server responded
             console.log(error.response.data);
@@ -538,7 +565,7 @@ export default createStore({
         .then(({ data }) => {
           commit('updateBoard', data);
         })
-        .catch(({ error }) => {
+        .catch((error) => {
           if (error.response) {
             // Request made and server responded
             console.log(error.response.data);
@@ -570,7 +597,7 @@ export default createStore({
         .then(({ data }) => {
           commit('loadContainers', data);
         })
-        .catch(({ error }) => {
+        .catch((error) => {
           if (error.response) {
             // Request made and server responded
             console.log(error.response.data);
@@ -602,7 +629,7 @@ export default createStore({
         .then(() => {
           commit('deleteContainer', url);
         })
-        .catch(({ error }) => {
+        .catch((error) => {
           if (error.response) {
             // Request made and server responded
             console.log(error.response.data);
