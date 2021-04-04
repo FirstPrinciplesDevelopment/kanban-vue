@@ -169,6 +169,8 @@ export default createStore({
       state.accessToken = '';
       state.refreshToken = '';
       state.isAuthenticated = false;
+      // clear Vuex state
+      state = {};
     },
     authenticate(state, data) {
       console.log('authenticate mutation');
