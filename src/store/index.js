@@ -333,6 +333,7 @@ export default createStore({
     },
   },
   actions: {
+    // GET API ROUTES
     async getApiRoutesAsync({ commit }) {
       console.log('in getApiRoutesAsync action');
       await axios.get(`${apiBase}`).then(({ data }) => {
@@ -340,7 +341,8 @@ export default createStore({
         commit('setRoutes', data);
       });
     },
-    async authenticateAsync({ commit }, payload) {
+    // AUTHENTICATE USER - TRADE U/P FOR TOKEN
+    async authenticateAsync({ commit, dispatch }, payload) {
       console.log('in authenticateAsync action');
       await axios
         .post(`${apiBase}/token/`, payload)
@@ -360,9 +362,9 @@ export default createStore({
             console.log(error.response.status);
             console.log(error.response.headers);
             // try to get a new access token
-            this.refreshAsync().then(() => {
+            dispatch('refreshAsync').then(() => {
               // try again
-              this.authenticateAsync(payload);
+              dispatch('authenticateAsync', payload);
             });
           } else if (error.request) {
             // The request was made but no response was received
@@ -373,6 +375,7 @@ export default createStore({
           }
         });
     },
+    // TRADE REFRESH TOKEN FOR NEW ACCESS TOKEN
     async refreshAsync({ commit }) {
       console.log('in refreshAsync action');
       await axios
@@ -383,9 +386,16 @@ export default createStore({
           } else {
             commit('logout');
           }
+        })
+        .catch((error) => {
+          // we were unable to refresh our access token, logout
+          console.log(error);
+          commit('pushMessage', 'Session Expired');
+          commit('logout');
         });
     },
-    async loadDataAsync({ commit }) {
+    // LOAD ALL DATA [NORMALIZED] FOR CURRENT USER
+    async loadDataAsync({ commit, dispatch }) {
       console.log('in loadDataAsync action');
       await axios
         .get(`${apiBase}/normalized/`, {
@@ -394,19 +404,20 @@ export default createStore({
           },
         })
         .then(({ data }) => {
-          // remove tokens from localStorage
+          // persist data to local vuex state
           commit('loadData', data);
         })
-        .catch(({ error }) => {
+        .catch((error) => {
+          console.log(`error: ${error}`);
           if (error.response) {
             // Request made and server responded
             console.log(error.response.data);
             console.log(error.response.status);
             console.log(error.response.headers);
             // try to get a new access token
-            this.refreshAsync().then(() => {
+            dispatch('refreshAsync').then(() => {
               // try again
-              this.loadDataAsync();
+              dispatch('loadDataAsync');
             });
           } else if (error.request) {
             // The request was made but no response was received
@@ -417,7 +428,8 @@ export default createStore({
           }
         });
     },
-    async loadBoardsAsync({ commit }) {
+    // LOAD ALL BOARDS FOR CURRENT USER
+    async loadBoardsAsync({ commit, dispatch }) {
       console.log('in loadBoardsAsync action');
       await axios
         .get(`${this.state.apiBaseRoutes.boards}`, {
@@ -435,9 +447,9 @@ export default createStore({
             console.log(error.response.status);
             console.log(error.response.headers);
             // try to get a new access token
-            this.refreshAsync().then(() => {
+            dispatch('refreshAsync').then(() => {
               // try again
-              this.loadBoardsAsync();
+              dispatch('loadBoardsAsync');
             });
           } else if (error.request) {
             // The request was made but no response was received
@@ -448,7 +460,8 @@ export default createStore({
           }
         });
     },
-    async deleteBoardAsync({ commit }, url) {
+    // DELETE A BOARD
+    async deleteBoardAsync({ commit, dispatch }, url) {
       console.log('in deleteBoardAsync action');
       await axios
         .delete(`${url}`, {
@@ -466,9 +479,9 @@ export default createStore({
             console.log(error.response.status);
             console.log(error.response.headers);
             // try to get a new access token
-            this.refreshAsync().then(() => {
+            dispatch('refreshAsync').then(() => {
               // try again
-              this.deleteBoardAsync(url);
+              dispatch('deleteBoardAsync', url);
             });
           } else if (error.request) {
             // The request was made but no response was received
@@ -479,7 +492,8 @@ export default createStore({
           }
         });
     },
-    async createBoardAsync({ commit }, payload) {
+    // CREATE A BOARD
+    async createBoardAsync({ commit, dispatch }, payload) {
       console.log('in createBoardAsync action');
       await axios
         .post(`${this.state.apiBaseRoutes.boards}`, payload, {
@@ -497,9 +511,9 @@ export default createStore({
             console.log(error.response.status);
             console.log(error.response.headers);
             // try to get a new access token
-            this.refreshAsync().then(() => {
+            dispatch('refreshAsync').then(() => {
               // try again
-              this.createBoardAsync(payload);
+              dispatch('createBoardAsync', payload);
             });
           } else if (error.request) {
             // The request was made but no response was received
@@ -510,7 +524,8 @@ export default createStore({
           }
         });
     },
-    async updateBoardAsync({ commit }, payload) {
+    // UPDATE A BOARD
+    async updateBoardAsync({ commit, dispatch }, payload) {
       console.log('in updateBoardAsync action');
       await axios
         .put(`${payload.url}`, payload, {
@@ -528,9 +543,9 @@ export default createStore({
             console.log(error.response.status);
             console.log(error.response.headers);
             // try to get a new access token
-            this.refreshAsync().then(() => {
+            dispatch('refreshAsync').then(() => {
               // try again
-              this.updateBoardAsync(payload);
+              dispatch('updateBoardAsync', payload);
             });
           } else if (error.request) {
             // The request was made but no response was received
@@ -541,7 +556,8 @@ export default createStore({
           }
         });
     },
-    async loadContainersAsync({ commit }) {
+    // LOAD ALL CONTAINERS FOR CURRENT USER
+    async loadContainersAsync({ commit, dispatch }) {
       console.log('in loadContainersAsync action');
       await axios
         .get(`${this.state.apiBaseRoutes.containers}`, {
@@ -559,9 +575,9 @@ export default createStore({
             console.log(error.response.status);
             console.log(error.response.headers);
             // try to get a new access token
-            this.refreshAsync().then(() => {
+            dispatch('refreshAsync').then(() => {
               // try again
-              this.loadContainersAsync();
+              dispatch('loadContainersAsync');
             });
           } else if (error.request) {
             // The request was made but no response was received
@@ -572,7 +588,8 @@ export default createStore({
           }
         });
     },
-    async deleteContainerAsync({ commit }, url) {
+    // DELETE A CONTAINER
+    async deleteContainerAsync({ commit, dispatch }, url) {
       console.log('in deleteContainerAsync action');
       await axios
         .delete(`${url}`, {
@@ -590,9 +607,9 @@ export default createStore({
             console.log(error.response.status);
             console.log(error.response.headers);
             // try to get a new access token
-            this.refreshAsync().then(() => {
+            dispatch('refreshAsync').then(() => {
               // try again
-              this.deleteContainerAsync(url);
+              dispatch('deleteContainerAsync', url);
             });
           } else if (error.request) {
             // The request was made but no response was received
@@ -603,7 +620,8 @@ export default createStore({
           }
         });
     },
-    async createContainerAsync({ commit }, payload) {
+    // CREATE A CONTAINER
+    async createContainerAsync({ commit, dispatch }, payload) {
       console.log('in createContainerAsync action');
       await axios
         .post(`${this.state.apiBaseRoutes.containers}`, payload, {
@@ -621,9 +639,9 @@ export default createStore({
             console.log(error.response.status);
             console.log(error.response.headers);
             // try to get a new access token
-            this.refreshAsync().then(() => {
+            dispatch('refreshAsync').then(() => {
               // try again
-              this.createContainerAsync(payload);
+              dispatch('createContainerAsync', payload);
             });
           } else if (error.request) {
             // The request was made but no response was received
@@ -634,7 +652,8 @@ export default createStore({
           }
         });
     },
-    async updateContainerAsync({ commit }, payload) {
+    // UPDATE A CONTAINER
+    async updateContainerAsync({ commit, dispatch }, payload) {
       console.log('in updateContainerAsync action');
       await axios
         .put(`${payload.url}`, payload, {
@@ -652,9 +671,9 @@ export default createStore({
             console.log(error.response.status);
             console.log(error.response.headers);
             // try to get a new access token
-            this.refreshAsync().then(() => {
+            dispatch('refreshAsync').then(() => {
               // try again
-              this.updateContainerAsync(payload);
+              dispatch('updateContainerAsync', payload);
             });
           } else if (error.request) {
             // The request was made but no response was received
@@ -665,7 +684,8 @@ export default createStore({
           }
         });
     },
-    async loadCardsAsync({ commit }) {
+    // LOAD ALL CARDS FOR CURRENT USER
+    async loadCardsAsync({ commit, dispatch }) {
       console.log('in loadCardsAsync action');
       await axios
         .get(`${this.state.apiBaseRoutes.cards}`, {
@@ -683,9 +703,9 @@ export default createStore({
             console.log(error.response.status);
             console.log(error.response.headers);
             // try to get a new access token
-            this.refreshAsync().then(() => {
+            dispatch('refreshAsync').then(() => {
               // try again
-              this.loadCardsAsync();
+              dispatch('loadCardsAsync');
             });
           } else if (error.request) {
             // The request was made but no response was received
@@ -696,7 +716,8 @@ export default createStore({
           }
         });
     },
-    async deleteCardAsync({ commit }, url) {
+    // DELETE A CARD
+    async deleteCardAsync({ commit, dispatch }, url) {
       console.log('in deleteCardAsync action');
       await axios
         .delete(`${url}`, {
@@ -714,9 +735,9 @@ export default createStore({
             console.log(error.response.status);
             console.log(error.response.headers);
             // try to get a new access token
-            this.refreshAsync().then(() => {
+            dispatch('refreshAsync').then(() => {
               // try again
-              this.deleteCardAsync(url);
+              dispatch('deleteCardAsync', url);
             });
           } else if (error.request) {
             // The request was made but no response was received
@@ -727,7 +748,8 @@ export default createStore({
           }
         });
     },
-    async createCardAsync({ commit }, payload) {
+    // CREATE A CARD
+    async createCardAsync({ commit, dispatch }, payload) {
       console.log('in createCardAsync action');
       await axios
         .post(`${this.state.apiBaseRoutes.cards}`, payload, {
@@ -746,9 +768,9 @@ export default createStore({
             console.log(error.response.status);
             console.log(error.response.headers);
             // try to get a new access token
-            this.refreshAsync().then(() => {
+            dispatch('refreshAsync').then(() => {
               // try again
-              this.createCardAsync(payload);
+              dispatch('createCardAsync', payload);
             });
           } else if (error.request) {
             // The request was made but no response was received
@@ -759,7 +781,8 @@ export default createStore({
           }
         });
     },
-    async updateCardAsync({ commit }, payload) {
+    // UPDATE A CARD
+    async updateCardAsync({ commit, dispatch }, payload) {
       console.log('in updateCardAsync action');
       await axios
         .put(`${payload.url}`, payload, {
@@ -778,9 +801,9 @@ export default createStore({
             console.log(error.response.status);
             console.log(error.response.headers);
             // try to get a new access token
-            this.refreshAsync().then(() => {
+            dispatch('refreshAsync').then(() => {
               // try again
-              this.updateCardAsync(payload);
+              dispatch('updateCardAsync', payload);
             });
           } else if (error.request) {
             // The request was made but no response was received
