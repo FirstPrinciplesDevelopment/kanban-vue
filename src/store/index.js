@@ -1,5 +1,6 @@
 import { createStore } from 'vuex';
 import axios from 'axios';
+import router from '../router/index.js';
 
 // define VUE_APP_API_BASE in .env under project root like
 // VUE_APP_API_BASE=http://example.com:8000
@@ -9,8 +10,10 @@ export default createStore({
   // enable strict mode for development only (impacts performance)
   strict: true,
   state: {
-    authToken: '',
+    accessToken: '',
+    refreshToken: '',
     isAuthenticated: false,
+    messageQueue: [],
     apiBaseRoutes: {
       attachments: '',
       boards: '',
@@ -139,6 +142,9 @@ export default createStore({
     getCardByUrl: (state) => (url) => {
       return state.cards[url];
     },
+    getMessages: (state) => {
+      return state.messageQueue;
+    },
   },
   mutations: {
     // mutations change vuex state, they DO NOT call APIs
@@ -146,11 +152,50 @@ export default createStore({
       console.log('setRoutes mutation');
       state.apiBaseRoutes = data;
     },
-    authenticate(state, token) {
+    pushMessage(state, message) {
+      console.log('pushMessage mutation');
+      state.messageQueue.push(message);
+    },
+    popMessage(state) {
+      console.log('popMessage mutation');
+      return state.messageQueue.pop();
+    },
+    clearMessages(state) {
+      console.log('clearMessages mutation');
+      state.messageQueue = [];
+    },
+    removeMessage(state, message) {
+      console.log('removeMessage mutation');
+      // get index of that message
+      var index = state.messageQueue.indexOf(message);
+      // if that message exists, remove it
+      if (index !== -1) {
+        state.messageQueue.splice(index, 1);
+      }
+    },
+    logout(state) {
+      console.log('logout mutation');
+      // remove tokens from localStorage
+      localStorage.removeItem('kanbanAccessToken');
+      localStorage.removeItem('kanbanRefreshToken');
+      // remove tokens from vuex state, set isAuthenticated = false
+      state.accessToken = '';
+      state.refreshToken = '';
+      state.isAuthenticated = false;
+      // clear Vuex state
+      state = {};
+    },
+    authenticate(state, data) {
       console.log('authenticate mutation');
-      console.log(token);
-      state.authToken = token;
+      console.log(data);
+      state.accessToken = data['access'];
+      state.refreshToken = data['refresh'];
       state.isAuthenticated = true;
+    },
+    refresh(state, accessToken) {
+      console.log('refresh mutation');
+      console.log(accessToken);
+      state.accessToken = accessToken;
     },
     loadData(state, data) {
       console.log('loadData mutation');
@@ -303,6 +348,7 @@ export default createStore({
     },
   },
   actions: {
+    // GET API ROUTES
     async getApiRoutesAsync({ commit }) {
       console.log('in getApiRoutesAsync action');
       await axios.get(`${apiBase}`).then(({ data }) => {
@@ -310,65 +356,53 @@ export default createStore({
         commit('setRoutes', data);
       });
     },
+    // REGISTER A NEW USER
+    async registerAsync({ commit }, payload) {
+      console.log('in registerAsync action');
+      return await axios
+        .post(`${apiBase}/register/`, payload)
+        .then(({ data }) => {
+          if (data['success']) {
+            commit('pushMessage', `Registered new user ${data['username']}`);
+            // navigate to boards (which will be redirected to Login)
+            router.push({ name: 'Boards' });
+          }
+        })
+        .catch((error) => {
+          if (error.response) {
+            commit(
+              'pushMessage',
+              `Failed to create new user ${payload['username']}: ${error.response.data['error']}`
+            );
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
+        });
+    },
+    // AUTHENTICATE USER - TRADE U/P FOR TOKEN
     async authenticateAsync({ commit }, payload) {
       console.log('in authenticateAsync action');
-      await axios.post(`${apiBase}/auth/`, payload).then(({ data }) => {
-        if (data['token']) {
-          // write token to localStorage
-          localStorage.setItem('kanbanAccessToken', data['token']);
-          // write token to Vuex store state
-          commit('authenticate', data['token']);
-        }
-      });
-    },
-    async loadDataAsync({ commit }) {
-      console.log('in loadDataAsync action');
       await axios
-        .get(`${apiBase}/normalized/`, {
-          headers: {
-            Authorization: `Token ${this.state.authToken}`,
-          },
-        })
+        .post(`${apiBase}/token/`, payload)
         .then(({ data }) => {
-          commit('loadData', data);
-        });
-    },
-    async loadBoardsAsync({ commit }) {
-      console.log('in loadBoardsAsync action');
-      await axios
-        .get(`${this.state.apiBaseRoutes.boards}`, {
-          headers: {
-            Authorization: `Token ${this.state.authToken}`,
-          },
+          if (data['access'] && data['refresh']) {
+            // write tokens to localStorage
+            localStorage.setItem('kanbanAccessToken', data['access']);
+            localStorage.setItem('kanbanRefreshToken', data['refresh']);
+            // write tokens to Vuex store state
+            commit('authenticate', data);
+            commit('pushMessage', `Welcome, ${payload['username']}!`);
+          }
         })
-        .then(({ data }) => {
-          commit('loadBoards', data);
-        });
-    },
-    async deleteBoardAsync({ commit }, url) {
-      console.log('in deleteBoardAsync action');
-      await axios
-        .delete(`${url}`, {
-          headers: {
-            Authorization: `Token ${this.state.authToken}`,
-          },
-        })
-        .then(() => {
-          commit('deleteBoard', url);
-        });
-    },
-    async createBoardAsync({ commit }, payload) {
-      console.log('in createBoardAsync action');
-      await axios
-        .post(`${this.state.apiBaseRoutes.boards}`, payload, {
-          headers: {
-            Authorization: `Token ${this.state.authToken}`,
-          },
-        })
-        .then(({ data }) => {
-          commit('createBoard', data);
-        })
-        .catch(function(error) {
+        .catch((error) => {
           if (error.response) {
             // Request made and server responded
             console.log(error.response.data);
@@ -383,48 +417,258 @@ export default createStore({
           }
         });
     },
-    async updateBoardAsync({ commit }, payload) {
+    // TRADE REFRESH TOKEN FOR NEW ACCESS TOKEN
+    async refreshAsync({ commit }) {
+      console.log('in refreshAsync action');
+      await axios
+        .post(`${apiBase}/token/refresh/`, { refresh: this.state.refreshToken })
+        .then(({ data }) => {
+          if (data['access']) {
+            commit('refresh', data['access']);
+          } else {
+            commit('logout');
+          }
+        })
+        .catch((error) => {
+          // we were unable to refresh our access token, logout
+          console.log(error);
+          commit('pushMessage', 'Session Expired');
+          commit('logout');
+        });
+    },
+    // LOAD ALL DATA [NORMALIZED] FOR CURRENT USER
+    async loadDataAsync({ commit, dispatch }) {
+      console.log('in loadDataAsync action');
+      await axios
+        .get(`${apiBase}/normalized/`, {
+          headers: {
+            Authorization: `Bearer ${this.state.accessToken}`,
+          },
+        })
+        .then(({ data }) => {
+          // persist data to local vuex state
+          commit('loadData', data);
+        })
+        .catch((error) => {
+          console.log(`error: ${error}`);
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            dispatch('refreshAsync').then(() => {
+              // try again
+              dispatch('loadDataAsync');
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
+        });
+    },
+    // LOAD ALL BOARDS FOR CURRENT USER
+    async loadBoardsAsync({ commit, dispatch }) {
+      console.log('in loadBoardsAsync action');
+      await axios
+        .get(`${this.state.apiBaseRoutes.boards}`, {
+          headers: {
+            Authorization: `Bearer ${this.state.accessToken}`,
+          },
+        })
+        .then(({ data }) => {
+          commit('loadBoards', data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            dispatch('refreshAsync').then(() => {
+              // try again
+              dispatch('loadBoardsAsync');
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
+        });
+    },
+    // DELETE A BOARD
+    async deleteBoardAsync({ commit, dispatch }, url) {
+      console.log('in deleteBoardAsync action');
+      await axios
+        .delete(`${url}`, {
+          headers: {
+            Authorization: `Bearer ${this.state.accessToken}`,
+          },
+        })
+        .then(() => {
+          commit('deleteBoard', url);
+        })
+        .catch((error) => {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            dispatch('refreshAsync').then(() => {
+              // try again
+              dispatch('deleteBoardAsync', url);
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
+        });
+    },
+    // CREATE A BOARD
+    async createBoardAsync({ commit, dispatch }, payload) {
+      console.log('in createBoardAsync action');
+      await axios
+        .post(`${this.state.apiBaseRoutes.boards}`, payload, {
+          headers: {
+            Authorization: `Bearer ${this.state.accessToken}`,
+          },
+        })
+        .then(({ data }) => {
+          commit('createBoard', data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            dispatch('refreshAsync').then(() => {
+              // try again
+              dispatch('createBoardAsync', payload);
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
+        });
+    },
+    // UPDATE A BOARD
+    async updateBoardAsync({ commit, dispatch }, payload) {
       console.log('in updateBoardAsync action');
       await axios
         .put(`${payload.url}`, payload, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
           commit('updateBoard', data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            dispatch('refreshAsync').then(() => {
+              // try again
+              dispatch('updateBoardAsync', payload);
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
-    async loadContainersAsync({ commit }) {
+    // LOAD ALL CONTAINERS FOR CURRENT USER
+    async loadContainersAsync({ commit, dispatch }) {
       console.log('in loadContainersAsync action');
       await axios
         .get(`${this.state.apiBaseRoutes.containers}`, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Token ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
           commit('loadContainers', data);
+        })
+        .catch((error) => {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            dispatch('refreshAsync').then(() => {
+              // try again
+              dispatch('loadContainersAsync');
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
-    async deleteContainerAsync({ commit }, url) {
+    // DELETE A CONTAINER
+    async deleteContainerAsync({ commit, dispatch }, url) {
       console.log('in deleteContainerAsync action');
       await axios
         .delete(`${url}`, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(() => {
           commit('deleteContainer', url);
+        })
+        .catch((error) => {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            dispatch('refreshAsync').then(() => {
+              // try again
+              dispatch('deleteContainerAsync', url);
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
-    async createContainerAsync({ commit }, payload) {
+    // CREATE A CONTAINER
+    async createContainerAsync({ commit, dispatch }, payload) {
       console.log('in createContainerAsync action');
       await axios
         .post(`${this.state.apiBaseRoutes.containers}`, payload, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
@@ -436,6 +680,11 @@ export default createStore({
             console.log(error.response.data);
             console.log(error.response.status);
             console.log(error.response.headers);
+            // try to get a new access token
+            dispatch('refreshAsync').then(() => {
+              // try again
+              dispatch('createContainerAsync', payload);
+            });
           } else if (error.request) {
             // The request was made but no response was received
             console.log(error.request);
@@ -445,48 +694,109 @@ export default createStore({
           }
         });
     },
-    async updateContainerAsync({ commit }, payload) {
+    // UPDATE A CONTAINER
+    async updateContainerAsync({ commit, dispatch }, payload) {
       console.log('in updateContainerAsync action');
       await axios
         .put(`${payload.url}`, payload, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
           commit('updateContainer', data);
+        })
+        .catch(function(error) {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            dispatch('refreshAsync').then(() => {
+              // try again
+              dispatch('updateContainerAsync', payload);
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
-    async loadCardsAsync({ commit }) {
+    // LOAD ALL CARDS FOR CURRENT USER
+    async loadCardsAsync({ commit, dispatch }) {
       console.log('in loadCardsAsync action');
       await axios
         .get(`${this.state.apiBaseRoutes.cards}`, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
           commit('loadCards', data);
+        })
+        .catch(function(error) {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            dispatch('refreshAsync').then(() => {
+              // try again
+              dispatch('loadCardsAsync');
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
-    async deleteCardAsync({ commit }, url) {
+    // DELETE A CARD
+    async deleteCardAsync({ commit, dispatch }, url) {
       console.log('in deleteCardAsync action');
       await axios
         .delete(`${url}`, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(() => {
           commit('deleteCard', url);
+        })
+        .catch(function(error) {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            dispatch('refreshAsync').then(() => {
+              // try again
+              dispatch('deleteCardAsync', url);
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
-    async createCardAsync({ commit }, payload) {
+    // CREATE A CARD
+    async createCardAsync({ commit, dispatch }, payload) {
       console.log('in createCardAsync action');
       await axios
         .post(`${this.state.apiBaseRoutes.cards}`, payload, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
@@ -499,6 +809,11 @@ export default createStore({
             console.log(error.response.data);
             console.log(error.response.status);
             console.log(error.response.headers);
+            // try to get a new access token
+            dispatch('refreshAsync').then(() => {
+              // try again
+              dispatch('createCardAsync', payload);
+            });
           } else if (error.request) {
             // The request was made but no response was received
             console.log(error.request);
@@ -508,16 +823,37 @@ export default createStore({
           }
         });
     },
-    async updateCardAsync({ commit }, payload) {
+    // UPDATE A CARD
+    async updateCardAsync({ commit, dispatch }, payload) {
       console.log('in updateCardAsync action');
       await axios
         .put(`${payload.url}`, payload, {
           headers: {
-            Authorization: `Token ${this.state.authToken}`,
+            Authorization: `Bearer ${this.state.accessToken}`,
           },
         })
         .then(({ data }) => {
           commit('updateCard', data);
+        })
+        .catch(function(error) {
+          // TODO: decompose
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            // try to get a new access token
+            dispatch('refreshAsync').then(() => {
+              // try again
+              dispatch('updateCardAsync', payload);
+            });
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
         });
     },
   },

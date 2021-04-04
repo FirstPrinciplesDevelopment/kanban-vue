@@ -10,7 +10,7 @@
           alt="site logo"
         />
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Login to your account
+          Register as a new user
         </h2>
       </div>
       <div class="mt-8 space-y-6">
@@ -44,48 +44,23 @@
           </div>
         </div>
 
-        <!-- Remember Me/Forgot Password controls -->
-        <!-- <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <input
-              id="remember_me"
-              name="remember_me"
-              type="checkbox"
-              class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-            />
-            <label for="remember_me" class="ml-2 block text-sm text-gray-900">
-              Remember me
-            </label>
-          </div>
-
-          <div class="text-sm">
-            <a
-              href="#"
-              class="font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              Forgot your password?
-            </a>
-          </div>
-        </div> -->
-
         <div>
           <button
             type="button"
-            v-on:click="authenticate"
+            v-on:click="register"
             class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
-            Sign in
+            Register
           </button>
         </div>
-
         <div class="flex justify-center">
           <div class="text-sm">
             <a
               href="#"
-              v-on:click="register"
+              v-on:click="goToLogin"
               class="object-center font-medium text-indigo-800 hover:text-indigo-500"
             >
-              Don't have an account? Register here.
+              Already registered? Login here.
             </a>
           </div>
         </div>
@@ -96,22 +71,20 @@
 
 <script>
 export default {
-  name: 'Login',
+  name: 'Register',
   data() {
     return { userName: '', password: '' };
   },
   methods: {
-    async authenticate() {
-      console.log('Authenticating async (awaiting)...');
-      await this.$store.dispatch('authenticateAsync', {
+    async register() {
+      console.log('Registering async (awaiting)...');
+      await this.$store.dispatch('registerAsync', {
         username: this.userName,
         password: this.password,
       });
-      console.log('Done Authenticating');
-      this.$router.push({ name: 'Boards' });
     },
-    register() {
-      this.$router.push({ name: 'Register' });
+    goToLogin() {
+      this.$router.push({ name: 'Login' });
     },
   },
 };

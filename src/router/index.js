@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Boards from '../views/Boards.vue';
 import Board from '../views/Board.vue';
 import Login from '../views/Login.vue';
+import Register from '../views/Register.vue';
 import store from '../store/index.js';
 
 const routes = [
@@ -35,6 +36,11 @@ const routes = [
     name: 'Login',
     component: Login,
   },
+  {
+    path: '/register/',
+    name: 'Register',
+    component: Register,
+  },
 ];
 
 const router = createRouter({
@@ -43,7 +49,7 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  if (to.name !== 'Login' && !store.state.isAuthenticated) {
+  if (to.name !== 'Login' && to.name !== 'Register' && !store.state.isAuthenticated) {
     next({ name: 'Login' });
   } else {
     next();
