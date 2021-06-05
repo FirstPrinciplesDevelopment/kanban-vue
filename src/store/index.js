@@ -404,6 +404,10 @@ export default createStore({
         })
         .catch((error) => {
           if (error.response) {
+            commit(
+              'pushMessage',
+              `Failed to authenticate user ${payload['username']}: ${error.response.data['detail']}`
+            );
             // Request made and server responded
             console.log(error.response.data);
             console.log(error.response.status);
